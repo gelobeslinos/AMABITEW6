@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Department extends Model
+{
+    protected $fillable = [
+        'name',
+        'description',
+        'manager_name',
+        'location',
+        'budget',
+    ];
+
+    protected $casts = [
+        'budget' => 'decimal:2',
+    ];
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    public function getEmployeeCountAttribute(): int
+    {
+        return $this->employees()->count();
+    }
+}
