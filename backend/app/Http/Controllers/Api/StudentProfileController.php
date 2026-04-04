@@ -40,6 +40,18 @@ class StudentProfileController extends Controller
             $query->byLearningStyle($request->input('learning_style'));
         }
 
+        if ($request->has('skill')) {
+            $query->bySkill($request->input('skill'));
+        }
+
+        if ($request->has('activity')) {
+            $query->byActivity($request->input('activity'));
+        }
+
+        if ($request->has('affiliation')) {
+            $query->byAffiliation($request->input('affiliation'));
+        }
+
         if ($request->has('search')) {
             $query->byStudentSearch($request->input('search'));
         }
@@ -71,6 +83,9 @@ class StudentProfileController extends Controller
             'learning_style' => 'nullable|string',
             'academic_strengths' => 'nullable|string',
             'academic_weaknesses' => 'nullable|string',
+            'academic_history' => 'nullable|string',
+            'non_academic_activities' => 'nullable|string',
+            'violations' => 'nullable|string',
             'gpa' => 'nullable|numeric|min:0|max:4',
             'career_aspiration' => 'nullable|string',
             'personal_goals' => 'nullable|string',
@@ -79,6 +94,8 @@ class StudentProfileController extends Controller
             'needs_intervention' => 'boolean',
             'intervention_notes' => 'nullable|string',
             'extracurricular_activities' => 'nullable|array',
+            'affiliations' => 'nullable|array',
+            'skills' => 'nullable|array',
             'leadership_experience' => 'nullable|string',
             'parent_contact_notes' => 'nullable|string',
         ]);
@@ -94,6 +111,9 @@ class StudentProfileController extends Controller
             'learning_style' => 'nullable|string',
             'academic_strengths' => 'nullable|string',
             'academic_weaknesses' => 'nullable|string',
+            'academic_history' => 'nullable|string',
+            'non_academic_activities' => 'nullable|string',
+            'violations' => 'nullable|string',
             'gpa' => 'nullable|numeric|min:0|max:4',
             'career_aspiration' => 'nullable|string',
             'personal_goals' => 'nullable|string',
@@ -102,6 +122,8 @@ class StudentProfileController extends Controller
             'needs_intervention' => 'boolean',
             'intervention_notes' => 'nullable|string',
             'extracurricular_activities' => 'nullable|array',
+            'affiliations' => 'nullable|array',
+            'skills' => 'nullable|array',
             'leadership_experience' => 'nullable|string',
             'parent_contact_notes' => 'nullable|string',
         ]);
@@ -132,6 +154,12 @@ class StudentProfileController extends Controller
     public function removeInterest(StudentInterest $studentInterest): JsonResponse
     {
         $studentInterest->delete();
+        return response()->json(null, 204);
+    }
+
+    public function destroy(StudentProfile $studentProfile): JsonResponse
+    {
+        $studentProfile->delete();
         return response()->json(null, 204);
     }
 

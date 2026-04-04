@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\LeaveRequestController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\StudentProfileController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Controllers\AnnouncementController;
 use Illuminate\Http\Request;
@@ -39,6 +40,7 @@ Route::middleware('api')->group(function () {
     Route::get('/student-profiles/{studentProfile}', [StudentProfileController::class, 'show']);
     Route::post('/student-profiles', [StudentProfileController::class, 'store']);
     Route::put('/student-profiles/{studentProfile}', [StudentProfileController::class, 'update']);
+    Route::delete('/student-profiles/{studentProfile}', [StudentProfileController::class, 'destroy']);
     Route::post('/student-interests', [StudentProfileController::class, 'addInterest']);
     Route::delete('/student-interests/{studentInterest}', [StudentProfileController::class, 'removeInterest']);
     Route::get('/popular-interests', [StudentProfileController::class, 'getPopularInterests']);
