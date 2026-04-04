@@ -101,6 +101,9 @@ export const studentProfileService = {
     if (filters?.gpa_max) params.append('gpa_max', filters.gpa_max);
     if (filters?.needs_intervention) params.append('needs_intervention', filters.needs_intervention);
     if (filters?.learning_style) params.append('learning_style', filters.learning_style);
+    if (filters?.skill) params.append('skill', filters.skill);
+    if (filters?.activity) params.append('activity', filters.activity);
+    if (filters?.affiliation) params.append('affiliation', filters.affiliation);
     if (filters?.search) params.append('search', filters.search);
 
     return api.get(`/student-profiles?${params.toString()}`).then(res => res.data.data);
@@ -108,6 +111,7 @@ export const studentProfileService = {
   getById: (id: number): Promise<any> => api.get(`/student-profiles/${id}`).then(res => res.data),
   create: (profile: any): Promise<any> => api.post('/student-profiles', profile).then(res => res.data),
   update: (id: number, profile: any): Promise<any> => api.put(`/student-profiles/${id}`, profile).then(res => res.data),
+  delete: (id: number): Promise<void> => api.delete(`/student-profiles/${id}`).then(res => res.data),
   addInterest: (interest: any): Promise<any> => api.post('/student-interests', interest).then(res => res.data),
   removeInterest: (id: number): Promise<void> => api.delete(`/student-interests/${id}`),
   getPopularInterests: (): Promise<any> => api.get('/popular-interests').then(res => res.data),

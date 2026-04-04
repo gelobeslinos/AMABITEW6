@@ -114,6 +114,33 @@ class StudentProfile extends Model
         return $query->where('learning_style', $learningStyle);
     }
 
+    public function scopeBySkill($query, $skill)
+    {
+        if (empty($skill)) {
+            return $query;
+        }
+
+        return $query->whereJsonContains('skills', $skill);
+    }
+
+    public function scopeByActivity($query, $activity)
+    {
+        if (empty($activity)) {
+            return $query;
+        }
+
+        return $query->where('non_academic_activities', 'like', "%{$activity}%");
+    }
+
+    public function scopeByAffiliation($query, $affiliation)
+    {
+        if (empty($affiliation)) {
+            return $query;
+        }
+
+        return $query->whereJsonContains('affiliations', $affiliation);
+    }
+
     // Scope for searching by student name or ID
     public function scopeByStudentSearch($query, $search)
     {
