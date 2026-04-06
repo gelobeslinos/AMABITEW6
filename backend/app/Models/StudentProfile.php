@@ -52,7 +52,7 @@ class StudentProfile extends Model
 
     public function interests(): HasMany
     {
-        return $this->hasMany(StudentInterest::class);
+        return $this->hasMany(StudentInterest::class, 'student_id', 'student_id');
     }
 
     // Scope for filtering by interests
@@ -114,31 +114,79 @@ class StudentProfile extends Model
         return $query->where('learning_style', $learningStyle);
     }
 
-    public function scopeBySkill($query, $skill)
+    public function scopeBySkill($query, $skills)
     {
-        if (empty($skill)) {
+        if (empty($skills)) {
             return $query;
         }
 
-        return $query->whereJsonContains('skills', $skill);
+        // Handle multiple skills (comma-separated or array)
+        $skillArray = is_array($skills) ? $skills : explode(',', $skills);
+        $skillArray = array_map('trim', $skillArray);
+        $skillArray = array_filter($skillArray);
+
+        if (empty($skillArray)) {
+            return $query;
+        }
+
+        // Use whereJsonContains for each skill with OR condition
+        $query->where(function ($subQuery) use ($skillArray) {
+            foreach ($skillArray as $skill) {
+                $subQuery->orWhereJsonContains('skills', $skill);
+            }
+        });
+
+        return $query;
     }
 
-    public function scopeByActivity($query, $activity)
+    public function scopeByActivity($query, $activities)
     {
-        if (empty($activity)) {
+        if (empty($activities)) {
             return $query;
         }
 
-        return $query->where('non_academic_activities', 'like', "%{$activity}%");
+        // Handle multiple activities (comma-separated or array)
+        $activityArray = is_array($activities) ? $activities : explode(',', $activities);
+        $activityArray = array_map('trim', $activityArray);
+        $activityArray = array_filter($activityArray);
+
+        if (empty($activityArray)) {
+            return $query;
+        }
+
+        // Use OR condition for multiple activities
+        $query->where(function ($subQuery) use ($activityArray) {
+            foreach ($activityArray as $activity) {
+                $subQuery->orWhere('non_academic_activities', 'like', "%{$activity}%");
+            }
+        });
+
+        return $query;
     }
 
-    public function scopeByAffiliation($query, $affiliation)
+    public function scopeByAffiliation($query, $affiliations)
     {
-        if (empty($affiliation)) {
+        if (empty($affiliations)) {
             return $query;
         }
 
-        return $query->whereJsonContains('affiliations', $affiliation);
+        // Handle multiple affiliations (comma-separated or array)
+        $affiliationArray = is_array($affiliations) ? $affiliations : explode(',', $affiliations);
+        $affiliationArray = array_map('trim', $affiliationArray);
+        $affiliationArray = array_filter($affiliationArray);
+
+        if (empty($affiliationArray)) {
+            return $query;
+        }
+
+        // Use whereJsonContains for each affiliation with OR condition
+        $query->where(function ($subQuery) use ($affiliationArray) {
+            foreach ($affiliationArray as $affiliation) {
+                $subQuery->orWhereJsonContains('affiliations', $affiliation);
+            }
+        });
+
+        return $query;
     }
 
     // Scope for searching by student name or ID

@@ -34,6 +34,8 @@ const Curriculum: React.FC = () => {
   const [curriculum, setCurriculum] = useState<Curriculum[]>([]);
   const [showSubjectForm, setShowSubjectForm] = useState(false);
   const [showCurriculumForm, setShowCurriculumForm] = useState(false);
+  const [showSubjectsModal, setShowSubjectsModal] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<Curriculum | null>(null);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [editingCurriculum, setEditingCurriculum] = useState<Curriculum | null>(null);
   const [subjectFormData, setSubjectFormData] = useState({ code: '', name: '', description: '' });
@@ -245,6 +247,16 @@ const Curriculum: React.FC = () => {
     }
   };
 
+  const handleViewSubjects = (program: Curriculum) => {
+    setSelectedProgram(program);
+    setShowSubjectsModal(true);
+  };
+
+  const handleCloseSubjectsModal = () => {
+    setShowSubjectsModal(false);
+    setSelectedProgram(null);
+  };
+
   const handleCancelSubject = () => {
     setSubjectFormData({ code: '', name: '', description: '' });
     setEditingSubject(null);
@@ -352,7 +364,7 @@ const Curriculum: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1100
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -771,6 +783,24 @@ const Curriculum: React.FC = () => {
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button
+                      onClick={() => handleViewSubjects(program)}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#ff6b35',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <BookOpenIcon style={{ width: '16px', height: '16px' }} />
+                      View Subjects
+                    </button>
+                    <button
                       onClick={() => handleEditCurriculum(program)}
                       style={{
                         padding: '8px 16px',
@@ -838,79 +868,12 @@ const Curriculum: React.FC = () => {
                       <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#2c3e50' }}>{program.level}</div>
                     </div>
                   </div>
-                  
-                  <div style={{ marginTop: '16px' }}>
-                    <h4 style={{
-                      margin: '0 0 12px 0',
-                      color: '#2c3e50',
-                      fontSize: '16px'
-                    }}>
-                      Subjects ({program.subjects.length})
-                    </h4>
-                    {program.subjects.length === 0 ? (
-                      <div style={{
-                        textAlign: 'center',
-                        padding: '20px',
-                        color: '#6c757d',
-                        backgroundColor: '#f8f9fa',
-                        borderRadius: '6px',
-                        border: '1px solid #e9ecef'
-                      }}>
-                        <BookOpenIcon style={{ width: '30px', height: '30px', color: '#ff6b35', marginBottom: '10px' }} />
-                        <p style={{ margin: 0, fontSize: '14px' }}>
-                          No subjects assigned to this curriculum yet.
-                        </p>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {program.subjects.map(subject => (
-                          <div key={subject.id} style={{
-                            backgroundColor: '#f8f9fa',
-                            border: '1px solid #e9ecef',
-                            borderRadius: '6px',
-                            padding: '12px',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                          }}>
-                            <div>
-                              <strong style={{ color: '#2c3e50' }}>{subject.code}</strong>
-                              <span style={{ marginLeft: '8px', color: '#6c757d' }}>{subject.name}</span>
-                            </div>
-                            <div style={{ display: 'flex', gap: '4px' }}>
-                              <button
-                                onClick={() => handleEditSubject(subject)}
-                                style={{
-                                  padding: '4px 8px',
-                                  backgroundColor: '#3498db',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  fontSize: '12px'
-                                }}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteSubject(subject.id)}
-                                style={{
-                                  padding: '4px 8px',
-                                  backgroundColor: '#e74c3c',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  fontSize: '12px'
-                                }}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <BookOpenIcon style={{ width: '20px', height: '20px', color: '#ff6b35' }} />
+                    <div>
+                      <div style={{ fontSize: '14px', color: '#6c757d' }}>Subjects</div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#2c3e50' }}>{program.subjects.length}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -918,6 +881,178 @@ const Curriculum: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Subjects Modal */}
+      {showSubjectsModal && selectedProgram && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            width: '90%',
+            maxWidth: '800px',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px'
+            }}>
+              <div>
+                <h2 style={{
+                  margin: '0 0 8px 0',
+                  color: '#2c3e50',
+                  fontSize: '20px'
+                }}>
+                  {selectedProgram.name}
+                </h2>
+                <p style={{
+                  margin: 0,
+                  color: '#6c757d',
+                  fontSize: '14px'
+                }}>
+                  Subjects ({selectedProgram.subjects.length})
+                </p>
+              </div>
+              <button
+                onClick={handleCloseSubjectsModal}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#6c757d'
+                }}
+              >
+                <XMarkIcon style={{ width: '24px', height: '24px' }} />
+              </button>
+            </div>
+
+            {selectedProgram.subjects.length === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                color: '#6c757d',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #e9ecef'
+              }}>
+                <BookOpenIcon style={{ width: '60px', height: '60px', color: '#ff6b35', marginBottom: '20px' }} />
+                <h3 style={{ margin: '0 0 10px 0', color: '#2c3e50', fontSize: '18px' }}>
+                  No Subjects Yet
+                </h3>
+                <p style={{ margin: 0, fontSize: '16px' }}>
+                  This curriculum program doesn't have any subjects assigned yet.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {selectedProgram.subjects.map(subject => (
+                  <div key={subject.id} style={{
+                    backgroundColor: '#f8f9fa',
+                    border: '1px solid #e9ecef',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start'
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ marginBottom: '8px' }}>
+                        <strong style={{ color: '#2c3e50', fontSize: '16px' }}>{subject.code}</strong>
+                        <span style={{ marginLeft: '8px', color: '#6c757d', fontSize: '16px' }}>{subject.name}</span>
+                      </div>
+                      {subject.description && (
+                        <p style={{
+                          margin: 0,
+                          color: '#6c757d',
+                          fontSize: '14px',
+                          lineHeight: '1.4'
+                        }}>
+                          {subject.description}
+                        </p>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+                      <button
+                        onClick={() => handleEditSubject(subject)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#3498db',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '14px'
+                        }}
+                      >
+                        <PencilIcon style={{ width: '14px', height: '14px' }} />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSubject(subject.id)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#e74c3c',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '14px'
+                        }}
+                      >
+                        <TrashIcon style={{ width: '14px', height: '14px' }} />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: '24px',
+              paddingTop: '20px',
+              borderTop: '1px solid #e9ecef'
+            }}>
+              <button
+                onClick={handleCloseSubjectsModal}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '600'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
