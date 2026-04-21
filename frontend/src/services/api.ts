@@ -106,7 +106,7 @@ export const studentProfileService = {
     if (filters?.affiliation) params.append('affiliation', filters.affiliation);
     if (filters?.search) params.append('search', filters.search);
 
-    return api.get(`/student-profiles?${params.toString()}`).then(res => res.data.data);
+    return api.get(`/student-profiles?${params.toString()}`).then(res => res.data.data || res.data);
   },
   getById: (id: number): Promise<any> => api.get(`/student-profiles/${id}`).then(res => res.data),
   create: (profile: any): Promise<any> => api.post('/student-profiles', profile).then(res => res.data),

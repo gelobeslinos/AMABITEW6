@@ -56,7 +56,7 @@ class StudentProfileController extends Controller
             $query->byStudentSearch($request->input('search'));
         }
 
-        $profiles = $query->paginate(10);
+        $profiles = $query->paginate(2000);
 
         return response()->json([
             'data' => StudentProfileResource::collection($profiles->items()),
