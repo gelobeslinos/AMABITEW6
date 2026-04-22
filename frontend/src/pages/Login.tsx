@@ -250,19 +250,32 @@ const Login: React.FC = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#f8f9fa',
+      backgroundImage: 'url(/hahga.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px'
+      padding: '20px',
+      position: 'relative'
     }}>
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.4)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)'
+      }}></div>
       <div style={{
         backgroundColor: 'white',
         borderRadius: '8px',
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
         width: '100%',
         maxWidth: '400px',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 1
       }}>
         {/* Header Section */}
         <div style={{
