@@ -32,6 +32,8 @@ const StudentSettings: React.FC = () => {
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
   const toast = useToast();
 
+  const isCollapsed = sidebarCollapsed && !sidebarHovered;
+
   useEffect(() => {
     const getUserInfo = () => {
       const user = localStorage.getItem('user');
@@ -50,8 +52,8 @@ const StudentSettings: React.FC = () => {
   const fetchStudentData = async (studentId: number) => {
     try {
       const students = await studentService.getAll();
-      const studentData = students.find(s => s.id === studentId);
-      
+      const studentData = students.find((s: Student) => s.id === studentId);
+
       if (studentData) {
         setStudent(studentData);
       } else {
@@ -77,11 +79,11 @@ const StudentSettings: React.FC = () => {
 
   const validatePasswordForm = () => {
     const errors: Record<string, string> = {};
-    
+
     if (!newPassword.trim()) errors.newPassword = 'New password is required';
-    if (newPassword.length < 6) errors.newPassword = 'Password must be at least 6 characters';
+    else if (newPassword.length < 6) errors.newPassword = 'Password must be at least 6 characters';
     if (newPassword !== confirmPassword) errors.confirmPassword = 'Passwords do not match';
-    
+
     setPasswordErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -93,13 +95,13 @@ const StudentSettings: React.FC = () => {
     try {
       console.log('Password changed for student:', student?.student_id);
       console.log('New password:', newPassword);
-      
+
       toast.success('Password changed successfully!');
       setShowPasswordModal(false);
       setNewPassword('');
       setConfirmPassword('');
       setPasswordErrors({});
-      
+
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       user.needsPasswordChange = false;
       localStorage.setItem('user', JSON.stringify(user));
@@ -136,43 +138,74 @@ const StudentSettings: React.FC = () => {
 
   return (
     <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
       display: 'flex',
-      backgroundColor: '#f8f9fa', 
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
     }}>
       {/* Sidebar */}
-      <div 
+      <div
         style={{
-          width: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
-          backgroundColor: '#1a1a1a',
+          width: isCollapsed ? '80px' : '280px',
+          background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
           color: 'white',
           minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           position: 'fixed',
-          zIndex: 999
+          zIndex: 999,
+          boxShadow: '4px 0 20px rgba(255,107,53,0.3)',
+          borderRight: '2px solid #ff6b35'
         }}
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}
       >
         {/* Logo Section */}
-        <div style={{ 
-          padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '20px',
+        <div style={{
+          padding: isCollapsed ? '15px 10px' : '20px',
           textAlign: 'center',
-          borderBottom: '1px solid #34495e',
-          transition: 'padding 0.3s ease'
+          borderBottom: '2px solid #ff6b35',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.08) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <img 
-            src="/1.jpg" 
-            alt="CCS Logo" 
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '60px',
+            height: '60px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.3) 0%, rgba(255,107,53,0.15) 100%)',
+            borderRadius: '0 0 0 60px'
+          }}></div>
+          <img
+            src="/1.jpg"
+            alt="CCS Logo"
             style={{
-              width: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
-              height: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
+              width: isCollapsed ? '30px' : '50px',
+              height: isCollapsed ? '30px' : '50px',
               borderRadius: '50%',
               objectFit: 'cover',
-              border: (sidebarCollapsed && !sidebarHovered) ? '1px solid #ff6b35' : '2px solid #ff6b35',
+              border: isCollapsed ? '2px solid #ff6b35' : '3px solid #ff6b35',
               marginBottom: '10px',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: '0 4px 15px rgba(255,107,53,0.4)'
             }}
           />
+          {!isCollapsed && (
+            <div style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#ff6b35',
+              marginTop: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              Student Portal
+            </div>
+          )}
         </div>
 
         {/* Burger Button */}
@@ -194,7 +227,8 @@ const StudentSettings: React.FC = () => {
             justifyContent: 'center',
             fontSize: '16px',
             fontWeight: 'bold',
-            zIndex: 10
+            zIndex: 10,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
           }}
         >
           {sidebarCollapsed ? '☰' : '✕'}
@@ -202,34 +236,36 @@ const StudentSettings: React.FC = () => {
 
         {/* Profile Section */}
         <div style={{
-          padding: (sidebarCollapsed && !sidebarHovered) ? '20px 10px' : '30px 20px',
+          padding: isCollapsed ? '20px 10px' : '30px 20px',
           borderBottom: '1px solid #34495e',
           textAlign: 'center',
           transition: 'padding 0.3s ease'
         }}>
           <div style={{
-            width: (sidebarCollapsed && !sidebarHovered) ? '40px' : '80px',
-            height: (sidebarCollapsed && !sidebarHovered) ? '40px' : '80px',
+            width: isCollapsed ? '40px' : '80px',
+            height: isCollapsed ? '40px' : '80px',
             borderRadius: '50%',
             backgroundColor: '#ff6b35',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 15px',
-            fontSize: (sidebarCollapsed && !sidebarHovered) ? '16px' : '32px',
+            fontSize: isCollapsed ? '16px' : '32px',
             fontWeight: 'bold',
             transition: 'all 0.3s ease'
           }}>
-            {(sidebarCollapsed && !sidebarHovered) ? student?.first_name?.[0] : `${student?.first_name?.[0]}${student?.last_name?.[0]}`}
+            {isCollapsed
+              ? student?.first_name?.[0]
+              : `${student?.first_name?.[0] ?? ''}${student?.last_name?.[0] ?? ''}`}
           </div>
-          {!(sidebarCollapsed && !sidebarHovered) && (
+          {!isCollapsed && (
             <>
               <h3 style={{ margin: '0 0 5px', fontSize: '18px' }}>
                 {student?.full_name}
               </h3>
-              <p style={{ 
-                margin: '0', 
-                fontSize: '14px', 
+              <p style={{
+                margin: '0',
+                fontSize: '14px',
                 color: '#bdc3c7',
                 marginBottom: '10px'
               }}>
@@ -250,114 +286,47 @@ const StudentSettings: React.FC = () => {
 
         {/* Navigation Menu */}
         <div style={{ flex: 1, padding: '20px 0' }}>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={handleBackToDashboard}
-          >
-            <>
-              <FontAwesomeIcon icon={faBarChart} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Dashboard"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-profile')}
-          >
-            <>
-              <FontAwesomeIcon icon={faUser} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Profile"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-subjects')}
-          >
-            <>
-              <FontAwesomeIcon icon={faBook} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Subject"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-assignments')}
-          >
-            <>
-              <FontAwesomeIcon icon={faChartLine} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Assignments"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-grades')}
-          >
-            <>
-              <FontAwesomeIcon icon={faPercent} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Grades"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            backgroundColor: '#ff6b35',
-            borderLeft: (sidebarCollapsed && !sidebarHovered) ? 'none' : '4px solid #e55a2b',
-            cursor: 'pointer',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            transition: 'all 0.3s ease',
-            fontWeight: 'bold'
-          }}>
-            <>
-              <FontAwesomeIcon icon={faGear} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Settings"}
-            </>
-          </div>
+          {[
+            { icon: faBarChart, label: 'Dashboard', action: handleBackToDashboard, active: false },
+            { icon: faUser, label: 'Profile', action: () => navigate('/student-profile'), active: false },
+            { icon: faBook, label: 'Subject', action: () => navigate('/student-subjects'), active: false },
+            { icon: faChartLine, label: 'Assignments', action: () => navigate('/student-assignments'), active: false },
+            { icon: faPercent, label: 'Grades', action: () => navigate('/student-grades'), active: false },
+            { icon: faGear, label: 'Settings', action: () => {}, active: true },
+          ].map(({ icon, label, action, active }) => (
+            <div
+              key={label}
+              style={{
+                padding: isCollapsed ? '15px 10px' : '15px 20px',
+                backgroundColor: active ? '#ff6b35' : 'transparent',
+                borderLeft: active && !isCollapsed ? '4px solid #e55a2b' : 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s',
+                textAlign: isCollapsed ? 'center' : 'left',
+                fontWeight: 'bold'
+              }}
+              onMouseEnter={(e) => { if (!active) e.currentTarget.style.backgroundColor = '#ff6b35'; }}
+              onMouseLeave={(e) => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}
+              onClick={action}
+            >
+              <FontAwesomeIcon icon={icon} />
+              {!isCollapsed && ` ${label}`}
+            </div>
+          ))}
         </div>
 
         {/* Logout Button */}
-        <div style={{ padding: (sidebarCollapsed && !sidebarHovered) ? '20px 10px' : '20px' }}>
+        <div style={{ padding: isCollapsed ? '20px 10px' : '20px' }}>
           <button
             onClick={handleLogout}
             style={{
               width: '100%',
-              padding: (sidebarCollapsed && !sidebarHovered) ? '10px' : '12px',
+              padding: isCollapsed ? '10px' : '12px',
               backgroundColor: '#e74c3c',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
-              fontSize: (sidebarCollapsed && !sidebarHovered) ? '12px' : '14px',
+              fontSize: isCollapsed ? '12px' : '14px',
               fontWeight: 'bold',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
@@ -366,7 +335,7 @@ const StudentSettings: React.FC = () => {
               justifyContent: 'center'
             }}
           >
-            {sidebarCollapsed ? '🚪' : 'Logout'}
+            {isCollapsed ? '🚪' : 'Logout'}
           </button>
         </div>
       </div>
@@ -374,24 +343,21 @@ const StudentSettings: React.FC = () => {
       {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
+        marginLeft: isCollapsed ? '80px' : '280px',
         padding: '40px',
-        backgroundColor: '#f8f9fa',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
         minHeight: '100vh',
         transition: 'margin-left 0.3s ease'
       }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {/* Header */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            borderRadius: '16px',
             padding: '30px',
             marginBottom: '30px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e9ecef'
+            boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+            border: '2px solid #ff6b35'
           }}>
             <div style={{
               display: 'flex',
@@ -425,7 +391,7 @@ const StudentSettings: React.FC = () => {
                 margin: '0',
                 fontSize: '28px',
                 fontWeight: 'bold',
-                color: '#2c3e50',
+                color: '#ff6b35',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px'
@@ -444,17 +410,17 @@ const StudentSettings: React.FC = () => {
           }}>
             {/* Account Settings */}
             <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+              borderRadius: '16px',
               padding: '25px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              border: '1px solid #e9ecef'
+              boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+              border: '2px solid #ff6b35'
             }}>
               <h2 style={{
                 margin: '0 0 20px',
                 fontSize: '18px',
                 fontWeight: 'bold',
-                color: '#2c3e50',
+                color: '#ff6b35',
                 borderBottom: '2px solid #ff6b35',
                 paddingBottom: '10px'
               }}>
@@ -527,255 +493,133 @@ const StudentSettings: React.FC = () => {
 
             {/* Privacy Settings */}
             <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+              borderRadius: '16px',
               padding: '25px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              border: '1px solid #e9ecef'
+              boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+              border: '2px solid #ff6b35'
             }}>
               <h2 style={{
                 margin: '0 0 20px',
                 fontSize: '18px',
                 fontWeight: 'bold',
-                color: '#2c3e50',
+                color: '#ff6b35',
                 borderBottom: '2px solid #ff6b35',
                 paddingBottom: '10px'
               }}>
                 🔒 Privacy Settings
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 0'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#2c3e50' }}>
-                    Profile Visibility
-                  </span>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '50px',
-                    height: '24px'
+                {[
+                  { label: 'Profile Visibility', defaultChecked: true },
+                  { label: 'Email Notifications', defaultChecked: true },
+                  { label: 'SMS Notifications', defaultChecked: false },
+                ].map(({ label, defaultChecked }) => (
+                  <div key={label} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 0'
                   }}>
-                    <input type="checkbox" defaultChecked style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: '#ff6b35',
-                      transition: '.4s',
-                      borderRadius: '34px'
+                    <span style={{ fontSize: '14px', color: '#cbd5e1' }}>{label}</span>
+                    <label style={{
+                      position: 'relative',
+                      display: 'inline-block',
+                      width: '50px',
+                      height: '24px'
                     }}>
+                      <input type="checkbox" defaultChecked={defaultChecked} style={{ opacity: 0, width: 0, height: 0 }} />
                       <span style={{
                         position: 'absolute',
-                        content: '',
-                        height: '18px',
-                        width: '18px',
-                        left: '3px',
-                        bottom: '3px',
-                        backgroundColor: 'white',
+                        cursor: 'pointer',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: defaultChecked ? '#ff6b35' : '#ccc',
                         transition: '.4s',
-                        borderRadius: '50%'
-                      }}></span>
-                    </span>
-                  </label>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 0'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#2c3e50' }}>
-                    Email Notifications
-                  </span>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '50px',
-                    height: '24px'
-                  }}>
-                    <input type="checkbox" defaultChecked style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: '#ff6b35',
-                      transition: '.4s',
-                      borderRadius: '34px'
-                    }}>
-                      <span style={{
-                        position: 'absolute',
-                        content: '',
-                        height: '18px',
-                        width: '18px',
-                        left: '3px',
-                        bottom: '3px',
-                        backgroundColor: 'white',
-                        transition: '.4s',
-                        borderRadius: '50%'
-                      }}></span>
-                    </span>
-                  </label>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 0'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#2c3e50' }}>
-                    SMS Notifications
-                  </span>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '50px',
-                    height: '24px'
-                  }}>
-                    <input type="checkbox" style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: '#ccc',
-                      transition: '.4s',
-                      borderRadius: '34px'
-                    }}>
-                      <span style={{
-                        position: 'absolute',
-                        content: '',
-                        height: '18px',
-                        width: '18px',
-                        left: '3px',
-                        bottom: '3px',
-                        backgroundColor: 'white',
-                        transition: '.4s',
-                        borderRadius: '50%'
-                      }}></span>
-                    </span>
-                  </label>
-                </div>
+                        borderRadius: '34px'
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          height: '18px',
+                          width: '18px',
+                          left: defaultChecked ? 'auto' : '3px',
+                          right: defaultChecked ? '3px' : 'auto',
+                          bottom: '3px',
+                          backgroundColor: 'white',
+                          transition: '.4s',
+                          borderRadius: '50%'
+                        }}></span>
+                      </span>
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* System Settings */}
             <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+              borderRadius: '16px',
               padding: '25px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              border: '1px solid #e9ecef'
+              boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+              border: '2px solid #ff6b35'
             }}>
               <h2 style={{
                 margin: '0 0 20px',
                 fontSize: '18px',
                 fontWeight: 'bold',
-                color: '#2c3e50',
+                color: '#ff6b35',
                 borderBottom: '2px solid #ff6b35',
                 paddingBottom: '10px'
               }}>
                 ⚙️ System Settings
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 0'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#2c3e50' }}>
-                    Dark Mode
-                  </span>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '50px',
-                    height: '24px'
+                {[
+                  { label: 'Dark Mode', defaultChecked: false },
+                  { label: 'Auto-save', defaultChecked: true },
+                ].map(({ label, defaultChecked }) => (
+                  <div key={label} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 0'
                   }}>
-                    <input type="checkbox" style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: '#ccc',
-                      transition: '.4s',
-                      borderRadius: '34px'
+                    <span style={{ fontSize: '14px', color: '#cbd5e1' }}>{label}</span>
+                    <label style={{
+                      position: 'relative',
+                      display: 'inline-block',
+                      width: '50px',
+                      height: '24px'
                     }}>
+                      <input type="checkbox" defaultChecked={defaultChecked} style={{ opacity: 0, width: 0, height: 0 }} />
                       <span style={{
                         position: 'absolute',
-                        content: '',
-                        height: '18px',
-                        width: '18px',
-                        left: '3px',
-                        bottom: '3px',
-                        backgroundColor: 'white',
+                        cursor: 'pointer',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: defaultChecked ? '#ff6b35' : '#ccc',
                         transition: '.4s',
-                        borderRadius: '50%'
-                      }}></span>
-                    </span>
-                  </label>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 0'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#2c3e50' }}>
-                    Auto-save
-                  </span>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '50px',
-                    height: '24px'
-                  }}>
-                    <input type="checkbox" defaultChecked style={{ opacity: 0, width: 0, height: 0 }} />
-                    <span style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: '#ff6b35',
-                      transition: '.4s',
-                      borderRadius: '34px'
-                    }}>
-                      <span style={{
-                        position: 'absolute',
-                        content: '',
-                        height: '18px',
-                        width: '18px',
-                        left: '3px',
-                        bottom: '3px',
-                        backgroundColor: 'white',
-                        transition: '.4s',
-                        borderRadius: '50%'
-                      }}></span>
-                    </span>
-                  </label>
-                </div>
+                        borderRadius: '34px'
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          height: '18px',
+                          width: '18px',
+                          left: defaultChecked ? 'auto' : '3px',
+                          right: defaultChecked ? '3px' : 'auto',
+                          bottom: '3px',
+                          backgroundColor: 'white',
+                          transition: '.4s',
+                          borderRadius: '50%'
+                        }}></span>
+                      </span>
+                    </label>
+                  </div>
+                ))}
                 <button
                   style={{
                     padding: '12px 20px',
                     backgroundColor: '#ffc107',
-                    color: '#2c3e50',
+                    color: '#212529',
                     border: 'none',
                     borderRadius: '6px',
                     fontSize: '14px',
@@ -801,10 +645,7 @@ const StudentSettings: React.FC = () => {
       {showPasswordModal && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
           display: 'flex',
           alignItems: 'center',
@@ -813,30 +654,31 @@ const StudentSettings: React.FC = () => {
           zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            borderRadius: '16px',
             padding: '30px',
             width: '100%',
             maxWidth: '450px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+            boxShadow: '0 10px 30px rgba(255,107,53,0.3)',
+            border: '2px solid #ff6b35'
           }}>
-            <h3 style={{ 
-              fontSize: '22px', 
-              fontWeight: 'bold', 
-              color: '#2c3e50',
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: 'bold',
+              color: '#ff6b35',
               marginBottom: '20px',
               textAlign: 'center'
             }}>
               🔐 Change Password
             </h3>
-            
+
             <form onSubmit={handlePasswordChange}>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#2c3e50',
+                  color: '#ff6b35',
                   marginBottom: '8px'
                 }}>
                   New Password
@@ -852,15 +694,13 @@ const StudentSettings: React.FC = () => {
                     border: passwordErrors.newPassword ? '1px solid #e74c3c' : '1px solid #dee2e6',
                     borderRadius: '6px',
                     fontSize: '14px',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    backgroundColor: '#0a0a0a',
+                    color: 'white'
                   }}
                 />
                 {passwordErrors.newPassword && (
-                  <div style={{
-                    color: '#e74c3c',
-                    fontSize: '12px',
-                    marginTop: '5px'
-                  }}>
+                  <div style={{ color: '#e74c3c', fontSize: '12px', marginTop: '5px' }}>
                     {passwordErrors.newPassword}
                   </div>
                 )}
@@ -871,7 +711,7 @@ const StudentSettings: React.FC = () => {
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#2c3e50',
+                  color: '#ff6b35',
                   marginBottom: '8px'
                 }}>
                   Confirm Password
@@ -887,15 +727,13 @@ const StudentSettings: React.FC = () => {
                     border: passwordErrors.confirmPassword ? '1px solid #e74c3c' : '1px solid #dee2e6',
                     borderRadius: '6px',
                     fontSize: '14px',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    backgroundColor: '#0a0a0a',
+                    color: 'white'
                   }}
                 />
                 {passwordErrors.confirmPassword && (
-                  <div style={{
-                    color: '#e74c3c',
-                    fontSize: '12px',
-                    marginTop: '5px'
-                  }}>
+                  <div style={{ color: '#e74c3c', fontSize: '12px', marginTop: '5px' }}>
                     {passwordErrors.confirmPassword}
                   </div>
                 )}
@@ -921,7 +759,7 @@ const StudentSettings: React.FC = () => {
                   style={{
                     flex: 1,
                     padding: '12px',
-                    backgroundColor: '#3498db',
+                    backgroundColor: '#ff6b35',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',

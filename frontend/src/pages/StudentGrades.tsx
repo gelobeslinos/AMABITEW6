@@ -57,8 +57,8 @@ const StudentGrades: React.FC = () => {
   const fetchStudentData = async (studentId: number) => {
     try {
       const students = await studentService.getAll();
-      const studentData = students.find(s => s.id === studentId);
-      
+      const studentData = students.find((s: Student) => s.id === studentId);
+
       if (studentData) {
         setStudent(studentData);
         fetchGrades();
@@ -76,7 +76,6 @@ const StudentGrades: React.FC = () => {
 
   const fetchGrades = async () => {
     try {
-      // Mock grades data
       const mockGrades: Grade[] = [
         {
           id: 1,
@@ -156,7 +155,7 @@ const StudentGrades: React.FC = () => {
           status: 'incomplete'
         }
       ];
-      
+
       setGrades(mockGrades);
     } catch (error) {
       console.error('Error fetching grades:', error);
@@ -182,27 +181,19 @@ const StudentGrades: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'passed':
-        return '#28a745';
-      case 'failed':
-        return '#e74c3c';
-      case 'incomplete':
-        return '#ffc107';
-      default:
-        return '#6c757d';
+      case 'passed': return '#28a745';
+      case 'failed': return '#e74c3c';
+      case 'incomplete': return '#ffc107';
+      default: return '#6c757d';
     }
   };
 
   const getStatusBg = (status: string) => {
     switch (status) {
-      case 'passed':
-        return '#d4edda';
-      case 'failed':
-        return '#f8d7da';
-      case 'incomplete':
-        return '#fff3cd';
-      default:
-        return '#f8f9fa';
+      case 'passed': return '#d4edda';
+      case 'failed': return '#f8d7da';
+      case 'incomplete': return '#fff3cd';
+      default: return '#f8f9fa';
     }
   };
 
@@ -212,6 +203,8 @@ const StudentGrades: React.FC = () => {
     const total = completedGrades.reduce((sum, grade) => sum + grade.overall, 0);
     return (total / completedGrades.length).toFixed(2);
   };
+
+  const isCollapsed = sidebarCollapsed && !sidebarHovered;
 
   if (loading) {
     return (
@@ -240,43 +233,74 @@ const StudentGrades: React.FC = () => {
 
   return (
     <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
       display: 'flex',
-      backgroundColor: '#f8f9fa', 
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
     }}>
       {/* Sidebar */}
-      <div 
+      <div
         style={{
           width: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
-          backgroundColor: '#1a1a1a',
+          background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
           color: 'white',
           minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           position: 'fixed',
-          zIndex: 999
+          zIndex: 999,
+          boxShadow: '4px 0 20px rgba(255,107,53,0.3)',
+          borderRight: '2px solid #ff6b35'
         }}
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}
       >
         {/* Logo Section */}
-        <div style={{ 
+        <div style={{
           padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '20px',
           textAlign: 'center',
-          borderBottom: '1px solid #34495e',
-          transition: 'padding 0.3s ease'
+          borderBottom: '2px solid #ff6b35',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.08) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <img 
-            src="/1.jpg" 
-            alt="CCS Logo" 
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '60px',
+            height: '60px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.3) 0%, rgba(255,107,53,0.15) 100%)',
+            borderRadius: '0 0 0 60px'
+          }}></div>
+          <img
+            src="/1.jpg"
+            alt="CCS Logo"
             style={{
               width: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
               height: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
               borderRadius: '50%',
               objectFit: 'cover',
-              border: (sidebarCollapsed && !sidebarHovered) ? '1px solid #ff6b35' : '2px solid #ff6b35',
+              border: (sidebarCollapsed && !sidebarHovered) ? '2px solid #ff6b35' : '3px solid #ff6b35',
               marginBottom: '10px',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: '0 4px 15px rgba(255,107,53,0.4)'
             }}
           />
+          {!isCollapsed && (
+            <div style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#ff6b35',
+              marginTop: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              Student Portal
+            </div>
+          )}
         </div>
 
         {/* Burger Button */}
@@ -326,14 +350,14 @@ const StudentGrades: React.FC = () => {
           }}>
             {(sidebarCollapsed && !sidebarHovered) ? student?.first_name?.[0] : `${student?.first_name?.[0]}${student?.last_name?.[0]}`}
           </div>
-          {!(sidebarCollapsed && !sidebarHovered) && (
+          {!sidebarCollapsed && (
             <>
               <h3 style={{ margin: '0 0 5px', fontSize: '18px' }}>
                 {student?.full_name}
               </h3>
-              <p style={{ 
-                margin: '0', 
-                fontSize: '14px', 
+              <p style={{
+                margin: '0',
+                fontSize: '14px',
                 color: '#bdc3c7',
                 marginBottom: '10px'
               }}>
@@ -354,100 +378,33 @@ const StudentGrades: React.FC = () => {
 
         {/* Navigation Menu */}
         <div style={{ flex: 1, padding: '20px 0' }}>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={handleBackToDashboard}
-          >
-            <>
-              <FontAwesomeIcon icon={faBarChart} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Dashboard"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-profile')}
-          >
-            <>
-              <FontAwesomeIcon icon={faUser} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Profile"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-subjects')}
-          >
-            <>
-              <FontAwesomeIcon icon={faBook} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Subject"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-assignments')}
-          >
-            <>
-              <FontAwesomeIcon icon={faChartLine} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Assignments"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            backgroundColor: '#ff6b35',
-            borderLeft: (sidebarCollapsed && !sidebarHovered) ? 'none' : '4px solid #e55a2b',
-            cursor: 'pointer',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            transition: 'all 0.3s ease',
-            fontWeight: 'bold'
-          }}>
-            <>
-              <FontAwesomeIcon icon={faPercent} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Grades"}
-            </>
-          </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/student-settings')}
-          >
-            <>
-              <FontAwesomeIcon icon={faGear} />
-              {!(sidebarCollapsed && !sidebarHovered) && " Settings"}
-            </>
-          </div>
+          {[
+            { icon: faBarChart, label: 'Dashboard', action: handleBackToDashboard, active: false },
+            { icon: faUser, label: 'Profile', action: () => navigate('/student-profile'), active: false },
+            { icon: faBook, label: 'Subject', action: () => navigate('/student-subjects'), active: false },
+            { icon: faChartLine, label: 'Assignments', action: () => navigate('/student-assignments'), active: false },
+            { icon: faPercent, label: 'Grades', action: () => {}, active: true },
+            { icon: faGear, label: 'Settings', action: () => navigate('/student-settings'), active: false },
+          ].map(({ icon, label, action, active }) => (
+            <div
+              key={label}
+              style={{
+                padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
+                backgroundColor: active ? '#ff6b35' : 'transparent',
+                borderLeft: active && !sidebarCollapsed ? '4px solid #e55a2b' : 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s',
+                textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
+                fontWeight: 'bold'
+              }}
+              onMouseEnter={(e) => { if (!active) e.currentTarget.style.backgroundColor = '#ff6b35'; }}
+              onMouseLeave={(e) => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}
+              onClick={action}
+            >
+              <FontAwesomeIcon icon={icon} />
+              {!(sidebarCollapsed && !sidebarHovered) && ` ${label}`}
+            </div>
+          ))}
         </div>
 
         {/* Logout Button */}
@@ -480,22 +437,19 @@ const StudentGrades: React.FC = () => {
         flex: 1,
         marginLeft: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
         padding: '40px',
-        backgroundColor: '#f8f9fa',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
         minHeight: '100vh',
         transition: 'margin-left 0.3s ease'
       }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {/* Header */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            borderRadius: '16px',
             padding: '30px',
             marginBottom: '30px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e9ecef'
+            boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+            border: '2px solid #ff6b35'
           }}>
             <div style={{
               display: 'flex',
@@ -529,7 +483,7 @@ const StudentGrades: React.FC = () => {
                 margin: '0',
                 fontSize: '28px',
                 fontWeight: 'bold',
-                color: '#2c3e50',
+                color: '#ff6b35',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px'
@@ -542,18 +496,18 @@ const StudentGrades: React.FC = () => {
 
           {/* GPA Summary */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            borderRadius: '16px',
             padding: '30px',
             marginBottom: '30px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e9ecef'
+            boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+            border: '2px solid #ff6b35'
           }}>
             <h2 style={{
               margin: '0 0 20px',
               fontSize: '20px',
               fontWeight: 'bold',
-              color: '#2c3e50',
+              color: '#ff6b35',
               borderBottom: '2px solid #ff6b35',
               paddingBottom: '10px'
             }}>
@@ -564,98 +518,27 @@ const StudentGrades: React.FC = () => {
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '20px'
             }}>
-              <div style={{
-                textAlign: 'center',
-                padding: '20px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e9ecef'
-              }}>
-                <div style={{
-                  fontSize: '32px',
-                  fontWeight: 'bold',
-                  color: '#ff6b35',
-                  marginBottom: '10px'
+              {[
+                { value: calculateGPA(), color: '#ff6b35', label: 'Current GPA' },
+                { value: grades.filter(g => g.status === 'passed').length, color: '#28a745', label: 'Courses Passed' },
+                { value: grades.filter(g => g.status === 'incomplete').length, color: '#ffc107', label: 'Incomplete' },
+                { value: grades.length, color: '#17a2b8', label: 'Total Courses' },
+              ].map(({ value, color, label }) => (
+                <div key={label} style={{
+                  textAlign: 'center',
+                  padding: '20px',
+                  background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                  borderRadius: '12px',
+                  border: '2px solid #ff6b35'
                 }}>
-                  {calculateGPA()}
+                  <div style={{ fontSize: '32px', fontWeight: 'bold', color, marginBottom: '10px' }}>
+                    {value}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#cbd5e1', fontWeight: '600' }}>
+                    {label}
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  fontWeight: '600'
-                }}>
-                  Current GPA
-                </div>
-              </div>
-              <div style={{
-                textAlign: 'center',
-                padding: '20px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e9ecef'
-              }}>
-                <div style={{
-                  fontSize: '32px',
-                  fontWeight: 'bold',
-                  color: '#28a745',
-                  marginBottom: '10px'
-                }}>
-                  {grades.filter(g => g.status === 'passed').length}
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  fontWeight: '600'
-                }}>
-                  Courses Passed
-                </div>
-              </div>
-              <div style={{
-                textAlign: 'center',
-                padding: '20px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e9ecef'
-              }}>
-                <div style={{
-                  fontSize: '32px',
-                  fontWeight: 'bold',
-                  color: '#ffc107',
-                  marginBottom: '10px'
-                }}>
-                  {grades.filter(g => g.status === 'incomplete').length}
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  fontWeight: '600'
-                }}>
-                  Incomplete
-                </div>
-              </div>
-              <div style={{
-                textAlign: 'center',
-                padding: '20px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e9ecef'
-              }}>
-                <div style={{
-                  fontSize: '32px',
-                  fontWeight: 'bold',
-                  color: '#17a2b8',
-                  marginBottom: '10px'
-                }}>
-                  {grades.length}
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#6c757d',
-                  fontWeight: '600'
-                }}>
-                  Total Courses
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -671,148 +554,61 @@ const StudentGrades: React.FC = () => {
               margin: '0 0 20px',
               fontSize: '20px',
               fontWeight: 'bold',
-              color: '#2c3e50',
+              color: '#ff6b35',
               borderBottom: '2px solid #ff6b35',
               paddingBottom: '10px'
             }}>
               📋 Detailed Grades
             </h2>
-            <div style={{
-              overflowX: 'auto'
-            }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '14px'
-              }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
                 <thead>
-                  <tr style={{
-                    backgroundColor: '#f8f9fa',
-                    borderBottom: '2px solid #dee2e6'
-                  }}>
-                    <th style={{
-                      padding: '12px',
-                      textAlign: 'left',
-                      fontWeight: '600',
-                      color: '#2c3e50',
-                      borderBottom: '1px solid #dee2e6'
-                    }}>Subject</th>
-                    <th style={{
-                      padding: '12px',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: '#2c3e50',
-                      borderBottom: '1px solid #dee2e6'
-                    }}>Midterm</th>
-                    <th style={{
-                      padding: '12px',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: '#2c3e50',
-                      borderBottom: '1px solid #dee2e6'
-                    }}>Final</th>
-                    <th style={{
-                      padding: '12px',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: '#2c3e50',
-                      borderBottom: '1px solid #dee2e6'
-                    }}>Assignment</th>
-                    <th style={{
-                      padding: '12px',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: '#2c3e50',
-                      borderBottom: '1px solid #dee2e6'
-                    }}>Quiz</th>
-                    <th style={{
-                      padding: '12px',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: '#2c3e50',
-                      borderBottom: '1px solid #dee2e6'
-                    }}>Overall</th>
-                    <th style={{
-                      padding: '12px',
-                      textAlign: 'center',
-                      fontWeight: '600',
-                      color: '#2c3e50',
-                      borderBottom: '1px solid #dee2e6'
-                    }}>Status</th>
+                  <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
+                    {['Subject', 'Midterm', 'Final', 'Assignment', 'Quiz', 'Overall', 'Status'].map((header) => (
+                      <th key={header} style={{
+                        padding: '12px',
+                        textAlign: header === 'Subject' ? 'left' : 'center',
+                        fontWeight: '600',
+                        color: '#ff6b35',
+                        borderBottom: '1px solid #dee2e6'
+                      }}>
+                        {header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {grades.map((grade) => (
-                    <tr key={grade.id} style={{
-                      borderBottom: '1px solid #dee2e6',
-                      transition: 'background-color 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    <tr
+                      key={grade.id}
+                      style={{ borderBottom: '1px solid #dee2e6', transition: 'background-color 0.3s ease' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      <td style={{
-                        padding: '12px',
-                        verticalAlign: 'top'
-                      }}>
-                        <div style={{
-                          fontWeight: '600',
-                          color: '#2c3e50',
-                          marginBottom: '4px'
-                        }}>
+                      <td style={{ padding: '12px', verticalAlign: 'top' }}>
+                        <div style={{ fontWeight: '600', color: '#ff6b35', marginBottom: '4px' }}>
                           {grade.subjectCode}
                         </div>
-                        <div style={{
-                          fontSize: '12px',
-                          color: '#6c757d'
-                        }}>
+                        <div style={{ fontSize: '12px', color: '#6c757d' }}>
                           {grade.subject}
                         </div>
                       </td>
-                      <td style={{
-                        padding: '12px',
-                        textAlign: 'center',
-                        color: getGradeColor(grade.midterm),
-                        fontWeight: 'bold'
-                      }}>
+                      <td style={{ padding: '12px', textAlign: 'center', color: getGradeColor(grade.midterm), fontWeight: 'bold' }}>
                         {grade.midterm}
                       </td>
-                      <td style={{
-                        padding: '12px',
-                        textAlign: 'center',
-                        color: getGradeColor(grade.final),
-                        fontWeight: 'bold'
-                      }}>
+                      <td style={{ padding: '12px', textAlign: 'center', color: getGradeColor(grade.final), fontWeight: 'bold' }}>
                         {grade.final || '-'}
                       </td>
-                      <td style={{
-                        padding: '12px',
-                        textAlign: 'center',
-                        color: getGradeColor(grade.assignment),
-                        fontWeight: 'bold'
-                      }}>
+                      <td style={{ padding: '12px', textAlign: 'center', color: getGradeColor(grade.assignment), fontWeight: 'bold' }}>
                         {grade.assignment}
                       </td>
-                      <td style={{
-                        padding: '12px',
-                        textAlign: 'center',
-                        color: getGradeColor(grade.quiz),
-                        fontWeight: 'bold'
-                      }}>
+                      <td style={{ padding: '12px', textAlign: 'center', color: getGradeColor(grade.quiz), fontWeight: 'bold' }}>
                         {grade.quiz}
                       </td>
-                      <td style={{
-                        padding: '12px',
-                        textAlign: 'center',
-                        color: getGradeColor(grade.overall),
-                        fontWeight: 'bold',
-                        fontSize: '16px'
-                      }}>
+                      <td style={{ padding: '12px', textAlign: 'center', color: getGradeColor(grade.overall), fontWeight: 'bold', fontSize: '16px' }}>
                         {grade.overall.toFixed(2)}
                       </td>
-                      <td style={{
-                        padding: '12px',
-                        textAlign: 'center'
-                      }}>
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
                         <span style={{
                           fontSize: '12px',
                           fontWeight: 'bold',

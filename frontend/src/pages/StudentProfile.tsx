@@ -95,31 +95,49 @@ const StudentProfile: React.FC = () => {
   }
 
   return (
-    <div style={{
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)', 
       display: 'flex',
-      backgroundColor: '#f8f9fa', 
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
     }}>
       {/* Sidebar */}
       <div 
         style={{
-          width: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
-          backgroundColor: '#1a1a1a',
+          width: (sidebarCollapsed && !sidebarHovered) ? '80px' : (sidebarHovered ? '280px' : '280px'),
+          background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
           color: 'white',
           minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           position: 'fixed',
-          zIndex: 999
+          zIndex: 999,
+          boxShadow: '4px 0 20px rgba(255,107,53,0.3)',
+          borderRight: '2px solid #ff6b35'
         }}
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}
       >
         {/* Logo Section */}
-        <div style={{ 
+        <div style={{
           padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '20px',
           textAlign: 'center',
-          borderBottom: '1px solid #34495e',
-          transition: 'padding 0.3s ease'
+          borderBottom: '2px solid #ff6b35',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.08) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '60px',
+            height: '60px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.3) 0%, rgba(255,107,53,0.15) 100%)',
+            borderRadius: '0 0 0 60px'
+          }}></div>
           <img 
             src="/1.jpg" 
             alt="CCS Logo" 
@@ -133,6 +151,18 @@ const StudentProfile: React.FC = () => {
               transition: 'all 0.3s ease'
             }}
           />
+          {!(sidebarCollapsed && !sidebarHovered) && (
+            <div style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#ff6b35',
+              marginTop: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              Student Portal
+            </div>
+          )}
         </div>
 
         {/* Burger Button */}
@@ -152,21 +182,32 @@ const StudentProfile: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            zIndex: 10
+            zIndex: 1000,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
           }}
         >
-          {sidebarCollapsed ? '☰' : '✕'}
+          {sidebarCollapsed ? '' : ''}
         </button>
 
         {/* Profile Section */}
         <div style={{
-          padding: (sidebarCollapsed && !sidebarHovered) ? '20px 10px' : '30px 20px',
-          borderBottom: '1px solid #34495e',
+          padding: (sidebarCollapsed && !sidebarHovered) ? '20px 15px' : '35px 25px',
+          borderBottom: '2px solid #ff6b35',
           textAlign: 'center',
-          transition: 'padding 0.3s ease'
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'linear-gradient(135deg, rgba(255,107,53,0.08) 0%, rgba(255,107,53,0.03) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '80px',
+            height: '80px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.08) 100%)',
+            borderRadius: '0 0 80px 0'
+          }}></div>
           <div style={{
             width: (sidebarCollapsed && !sidebarHovered) ? '40px' : '80px',
             height: (sidebarCollapsed && !sidebarHovered) ? '40px' : '80px',
@@ -336,7 +377,7 @@ const StudentProfile: React.FC = () => {
         flex: 1,
         marginLeft: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
         padding: '40px',
-        backgroundColor: '#f8f9fa',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
         minHeight: '100vh',
         transition: 'margin-left 0.3s ease'
       }}>
@@ -346,12 +387,12 @@ const StudentProfile: React.FC = () => {
         }}>
           {/* Header */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            borderRadius: '16px',
             padding: '30px',
             marginBottom: '30px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e9ecef'
+            boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+            border: '2px solid #ff6b35'
           }}>
             <div style={{
               display: 'flex',
@@ -385,7 +426,7 @@ const StudentProfile: React.FC = () => {
                 margin: '0',
                 fontSize: '28px',
                 fontWeight: 'bold',
-                color: '#2c3e50',
+                color: '#ff6b35',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px'
@@ -398,18 +439,18 @@ const StudentProfile: React.FC = () => {
 
           {/* Profile Information */}
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            borderRadius: '16px',
             padding: '30px',
             marginBottom: '30px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e9ecef'
+            boxShadow: '0 4px 20px rgba(255,107,53,0.15)',
+            border: '2px solid #ff6b35'
           }}>
             <h2 style={{
               margin: '0 0 30px',
               fontSize: '20px',
               fontWeight: 'bold',
-              color: '#2c3e50',
+              color: '#ff6b35',
               borderBottom: '2px solid #ff6b35',
               paddingBottom: '10px'
             }}>
@@ -421,10 +462,10 @@ const StudentProfile: React.FC = () => {
               gap: '25px'
             }}>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -437,16 +478,16 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50'
+                  color: '#cbd5e1'
                 }}>
                   {student?.full_name}
                 </div>
               </div>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -459,16 +500,16 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50'
+                  color: '#cbd5e1'
                 }}>
                   {student?.student_id}
                 </div>
               </div>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -481,17 +522,17 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50',
+                  color: '#ff6b35',
                   wordBreak: 'break-all'
                 }}>
                   {student?.email}
                 </div>
               </div>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -504,16 +545,16 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50'
+                  color: '#cbd5e1'
                 }}>
                   {student?.phone}
                 </div>
               </div>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -526,16 +567,16 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50'
+                  color: '#cbd5e1'
                 }}>
                   {student?.program}
                 </div>
               </div>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -548,16 +589,16 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50'
+                  color: '#cbd5e1'
                 }}>
                   {student?.year_level}
                 </div>
               </div>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -570,7 +611,7 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50'
+                  color: '#cbd5e1'
                 }}>
                   <span style={{
                     backgroundColor: student?.status === 'active' ? '#28a745' : '#e74c3c',
@@ -584,10 +625,10 @@ const StudentProfile: React.FC = () => {
                 </div>
               </div>
               <div style={{
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                borderRadius: '12px',
                 padding: '20px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #ff6b35'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -600,7 +641,7 @@ const StudentProfile: React.FC = () => {
                 <div style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#2c3e50'
+                  color: '#cbd5e1'
                 }}>
                   {new Date(student?.date_enrolled || '').toLocaleDateString()}
                 </div>

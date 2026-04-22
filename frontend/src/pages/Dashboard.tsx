@@ -12,8 +12,7 @@ import {
   ChartPieIcon,
   MegaphoneIcon,
   XMarkIcon,
-  UserCircleIcon,
-} from '@heroicons/react/24/outline';
+  } from '@heroicons/react/24/outline';
 
 interface Announcement {
   id: string;
@@ -181,131 +180,239 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ 
+      padding: 'clamp(12px, 3vw, 24px)',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      minHeight: '100vh'
+    }}>
       {/* Stats Cards */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-        gap: '20px',
-        marginBottom: '24px'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gap: 'clamp(12px, 2vw, 24px)',
+        marginBottom: 'clamp(20px, 4vw, 32px)'
       }}>
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          borderLeft: '4px solid #3b82f6'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: 'clamp(12px, 2vw, 16px)',
+          padding: 'clamp(16px, 3vw, 24px)',
+          boxShadow: '0 10px 30px rgba(59, 130, 246, 0.15)',
+          border: '1px solid rgba(59, 130, 246, 0.1)',
+          position: 'relative',
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 20px 40px rgba(59, 130, 246, 0.25)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.15)';
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: 'clamp(60px, 8vw, 80px)',
+            height: 'clamp(60px, 8vw, 80px)',
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%)',
+            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
+          }}></div>
           <div style={{ 
-            fontSize: '14px', 
-            color: '#6c757d', 
-            marginBottom: '8px',
+            fontSize: 'clamp(12px, 2vw, 14px)', 
+            color: '#64748b', 
+            marginBottom: 'clamp(8px, 2vw, 12px)',
             textTransform: 'uppercase',
-            fontWeight: '600'
+            fontWeight: '600',
+            letterSpacing: '0.5px'
           }}>
             Total Employees
           </div>
           <div style={{ 
-            fontSize: '32px', 
+            fontSize: 'clamp(24px, 4vw, 36px)', 
             fontWeight: 'bold', 
-            color: '#2c3e50',
-            marginBottom: '8px'
+            color: '#1e293b',
+            marginBottom: 'clamp(8px, 2vw, 12px)',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
           }}>
             {stats.totalEmployees}
           </div>
-          <div style={{ fontSize: '14px', color: '#6c757d' }}>
-            <UserGroupIcon style={{ width: '20px', height: '20px', marginRight: '8px' }} />
-            Staff Members
+          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            <UserGroupIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#3b82f6' }} />
+            <span>Staff Members</span>
           </div>
         </div>
 
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          borderLeft: '4px solid #10b981'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: 'clamp(12px, 2vw, 16px)',
+          padding: 'clamp(16px, 3vw, 24px)',
+          boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)',
+          border: '1px solid rgba(16, 185, 129, 0.1)',
+          position: 'relative',
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 20px 40px rgba(16, 185, 129, 0.25)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 10px 30px rgba(16, 185, 129, 0.15)';
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: 'clamp(60px, 8vw, 80px)',
+            height: 'clamp(60px, 8vw, 80px)',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)',
+            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
+          }}></div>
           <div style={{ 
-            fontSize: '14px', 
-            color: '#6c757d', 
-            marginBottom: '8px',
+            fontSize: 'clamp(12px, 2vw, 14px)', 
+            color: '#64748b', 
+            marginBottom: 'clamp(8px, 2vw, 12px)',
             textTransform: 'uppercase',
-            fontWeight: '600'
+            fontWeight: '600',
+            letterSpacing: '0.5px'
           }}>
             Total Students
           </div>
           <div style={{ 
-            fontSize: '32px', 
+            fontSize: 'clamp(24px, 4vw, 36px)', 
             fontWeight: 'bold', 
-            color: '#2c3e50',
-            marginBottom: '8px'
+            color: '#1e293b',
+            marginBottom: 'clamp(8px, 2vw, 12px)',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
           }}>
             {stats.totalStudents}
           </div>
-          <div style={{ fontSize: '14px', color: '#6c757d' }}>
-            <AcademicCapIcon style={{ width: '20px', height: '20px', marginRight: '8px' }} />
-            Enrolled Students
+          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            <AcademicCapIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#10b981' }} />
+            <span>Enrolled Students</span>
           </div>
         </div>
 
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          borderLeft: '4px solid #8b5cf6'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: 'clamp(12px, 2vw, 16px)',
+          padding: 'clamp(16px, 3vw, 24px)',
+          boxShadow: '0 10px 30px rgba(139, 92, 246, 0.15)',
+          border: '1px solid rgba(139, 92, 246, 0.1)',
+          position: 'relative',
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 20px 40px rgba(139, 92, 246, 0.25)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.15)';
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: 'clamp(60px, 8vw, 80px)',
+            height: 'clamp(60px, 8vw, 80px)',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%)',
+            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
+          }}></div>
           <div style={{ 
-            fontSize: '14px', 
-            color: '#6c757d', 
-            marginBottom: '8px',
+            fontSize: 'clamp(12px, 2vw, 14px)', 
+            color: '#64748b', 
+            marginBottom: 'clamp(8px, 2vw, 12px)',
             textTransform: 'uppercase',
-            fontWeight: '600'
+            fontWeight: '600',
+            letterSpacing: '0.5px'
           }}>
             Today's Attendance
           </div>
           <div style={{ 
-            fontSize: '32px', 
+            fontSize: 'clamp(24px, 4vw, 36px)', 
             fontWeight: 'bold', 
-            color: '#2c3e50',
-            marginBottom: '8px'
+            color: '#1e293b',
+            marginBottom: 'clamp(8px, 2vw, 12px)',
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
           }}>
             {stats.todayAttendance}
           </div>
-          <div style={{ fontSize: '14px', color: '#6c757d' }}>
-            <CalendarDaysIcon style={{ width: '20px', height: '20px', marginRight: '8px' }} />
-            Present Today
+          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            <CalendarDaysIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#8b5cf6' }} />
+            <span>Present Today</span>
           </div>
         </div>
 
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          borderLeft: '4px solid #f59e0b'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: 'clamp(12px, 2vw, 16px)',
+          padding: 'clamp(16px, 3vw, 24px)',
+          boxShadow: '0 10px 30px rgba(245, 158, 11, 0.15)',
+          border: '1px solid rgba(245, 158, 11, 0.1)',
+          position: 'relative',
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 20px 40px rgba(245, 158, 11, 0.25)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 10px 30px rgba(245, 158, 11, 0.15)';
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: 'clamp(60px, 8vw, 80px)',
+            height: 'clamp(60px, 8vw, 80px)',
+            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%)',
+            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
+          }}></div>
           <div style={{ 
-            fontSize: '14px', 
-            color: '#6c757d', 
-            marginBottom: '8px',
+            fontSize: 'clamp(12px, 2vw, 14px)', 
+            color: '#64748b', 
+            marginBottom: 'clamp(8px, 2vw, 12px)',
             textTransform: 'uppercase',
-            fontWeight: '600'
+            fontWeight: '600',
+            letterSpacing: '0.5px'
           }}>
             Pending Requests
           </div>
           <div style={{ 
-            fontSize: '32px', 
+            fontSize: 'clamp(24px, 4vw, 36px)', 
             fontWeight: 'bold', 
-            color: '#2c3e50',
-            marginBottom: '8px'
+            color: '#1e293b',
+            marginBottom: 'clamp(8px, 2vw, 12px)',
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
           }}>
             {stats.pendingLeaveRequests}
           </div>
-          <div style={{ fontSize: '14px', color: '#6c757d' }}>
-            <DocumentTextIcon style={{ width: '20px', height: '20px', marginRight: '8px' }} />
-            Leave Requests
+          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            <DocumentTextIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#f59e0b' }} />
+            <span>Leave Requests</span>
           </div>
         </div>
       </div>
@@ -318,201 +425,399 @@ const Dashboard: React.FC = () => {
       }}>
         {/* Quick Actions */}
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: '16px',
+          padding: '28px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '100px',
+            height: '100px',
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%)',
+            borderRadius: '0 16px 0 100px'
+          }}></div>
+          
           <h2 style={{ 
-            margin: '0 0 20px', 
-            fontSize: '18px', 
-            color: '#2c3e50',
-            fontWeight: '600'
+            margin: '0 0 24px', 
+            fontSize: '20px', 
+            color: '#1e293b',
+            fontWeight: '700',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
           }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              borderRadius: '50%'
+            }}></div>
             Quick Actions
           </h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <button
               onClick={() => navigate('/employees')}
               style={{
-                width: '100%',
-                padding: '12px 16px',
-                backgroundColor: '#eff6ff',
+                padding: '16px',
+                background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
                 color: '#1d4ed8',
-                border: '1px solid #dbeafe',
-                borderRadius: '8px',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '12px',
                 fontSize: '14px',
-                fontWeight: '500',
+                fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(59, 130, 246, 0.25)';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
+                e.currentTarget.style.color = '#1d4ed8';
               }}
             >
-              <PlusCircleIcon style={{ width: '20px', height: '20px' }} />
-              Add New Employee
+              <PlusCircleIcon style={{ width: '24px', height: '24px' }} />
+              <span>Add Employee</span>
             </button>
             
             <button
               onClick={() => navigate('/students')}
               style={{
-                width: '100%',
-                padding: '12px 16px',
-                backgroundColor: '#f0fdf4',
+                padding: '16px',
+                background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
                 color: '#166534',
-                border: '1px solid #dcfce7',
-                borderRadius: '8px',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                borderRadius: '12px',
                 fontSize: '14px',
-                fontWeight: '500',
+                fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(34, 197, 94, 0.25)';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)';
+                e.currentTarget.style.color = '#166534';
               }}
             >
-              <AcademicCapIcon style={{ width: '20px', height: '20px' }} />
-              Add New Student
+              <AcademicCapIcon style={{ width: '24px', height: '24px' }} />
+              <span>Add Student</span>
             </button>
             
             <button
               onClick={() => navigate('/attendance')}
               style={{
-                width: '100%',
-                padding: '12px 16px',
-                backgroundColor: '#faf5ff',
+                padding: '16px',
+                background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
                 color: '#7c3aed',
-                border: '1px solid #f3e8ff',
-                borderRadius: '8px',
+                border: '1px solid rgba(139, 92, 246, 0.2)',
+                borderRadius: '12px',
                 fontSize: '14px',
-                fontWeight: '500',
+                fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(139, 92, 246, 0.25)';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)';
+                e.currentTarget.style.color = '#7c3aed';
               }}
             >
-              <CalendarDaysIcon style={{ width: '20px', height: '20px' }} />
-              Mark Attendance
+              <CalendarDaysIcon style={{ width: '24px', height: '24px' }} />
+              <span>Attendance</span>
             </button>
             
             <button
               onClick={() => navigate('/leave-requests')}
               style={{
-                width: '100%',
-                padding: '12px 16px',
-                backgroundColor: '#fff7ed',
+                padding: '16px',
+                background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
                 color: '#c2410c',
-                border: '1px solid #fed7aa',
-                borderRadius: '8px',
+                border: '1px solid rgba(245, 158, 11, 0.2)',
+                borderRadius: '12px',
                 fontSize: '14px',
-                fontWeight: '500',
+                fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(245, 158, 11, 0.25)';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)';
+                e.currentTarget.style.color = '#c2410c';
               }}
             >
-              <DocumentTextIcon style={{ width: '20px', height: '20px' }} />
-              Review Leave Requests
+              <DocumentTextIcon style={{ width: '24px', height: '24px' }} />
+              <span>Leave Requests</span>
             </button>
           </div>
         </div>
 
         {/* System Status */}
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: '16px',
+          padding: '28px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '100px',
+            height: '100px',
+            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%)',
+            borderRadius: '0 16px 0 100px'
+          }}></div>
+          
           <h2 style={{ 
-            margin: '0 0 20px', 
-            fontSize: '18px', 
-            color: '#2c3e50',
-            fontWeight: '600'
+            margin: '0 0 24px', 
+            fontSize: '20px', 
+            color: '#1e293b',
+            fontWeight: '700',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
           }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              borderRadius: '50%',
+              animation: 'pulse 2s infinite'
+            }}></div>
             System Status
           </h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{
-              padding: '12px',
-              backgroundColor: '#d4edda',
-              borderRadius: '8px',
-              borderLeft: '4px solid #28a745'
+              padding: '16px',
+              background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
+              borderRadius: '12px',
+              border: '1px solid rgba(40, 167, 69, 0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(40, 167, 69, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}>
+              <div style={{
+                position: 'absolute',
+                top: '0',
+                right: '0',
+                width: '40px',
+                height: '40px',
+                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)',
+                borderRadius: '0 12px 0 40px'
+              }}></div>
               <div style={{ 
                 fontWeight: '600', 
                 color: '#155724', 
-                marginBottom: '4px',
-                fontSize: '14px',
+                marginBottom: '6px',
+                fontSize: '15px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '10px'
               }}>
-                <CheckCircleIcon style={{ width: '20px', height: '20px' }} />
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <CheckCircleIcon style={{ width: '16px', height: '16px', color: 'white' }} />
+                </div>
                 System Operational
               </div>
               <div style={{ 
-                fontSize: '13px', 
-                color: '#155724'
+                fontSize: '14px', 
+                color: '#155724',
+                paddingLeft: '34px'
               }}>
-                All systems are running normally.
+                All systems are running normally
               </div>
             </div>
 
             <div style={{
-              padding: '12px',
-              backgroundColor: '#d1ecf1',
-              borderRadius: '8px',
-              borderLeft: '4px solid #17a2b8'
+              padding: '16px',
+              background: 'linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)',
+              borderRadius: '12px',
+              border: '1px solid rgba(23, 162, 184, 0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(23, 162, 184, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}>
+              <div style={{
+                position: 'absolute',
+                top: '0',
+                right: '0',
+                width: '40px',
+                height: '40px',
+                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%)',
+                borderRadius: '0 12px 0 40px'
+              }}></div>
               <div style={{ 
                 fontWeight: '600', 
                 color: '#0c5460', 
-                marginBottom: '4px',
-                fontSize: '14px',
+                marginBottom: '6px',
+                fontSize: '15px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '10px'
               }}>
-                <ClockIcon style={{ width: '20px', height: '20px' }} />
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  background: 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <ClockIcon style={{ width: '16px', height: '16px', color: 'white' }} />
+                </div>
                 Last Sync
               </div>
               <div style={{ 
-                fontSize: '13px', 
-                color: '#0c5460'
+                fontSize: '14px', 
+                color: '#0c5460',
+                paddingLeft: '34px'
               }}>
                 {new Date().toLocaleTimeString()}
               </div>
             </div>
 
             <div style={{
-              padding: '12px',
-              backgroundColor: '#fff3cd',
-              borderRadius: '8px',
-              borderLeft: '4px solid #ffc107'
+              padding: '16px',
+              background: 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 193, 7, 0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 193, 7, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}>
+              <div style={{
+                position: 'absolute',
+                top: '0',
+                right: '0',
+                width: '40px',
+                height: '40px',
+                background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)',
+                borderRadius: '0 12px 0 40px'
+              }}></div>
               <div style={{ 
                 fontWeight: '600', 
                 color: '#856404', 
-                marginBottom: '4px',
-                fontSize: '14px',
+                marginBottom: '6px',
+                fontSize: '15px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '10px'
               }}>
-                <ChartPieIcon style={{ width: '20px', height: '20px' }} />
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  background: 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <ChartPieIcon style={{ width: '16px', height: '16px', color: 'white' }} />
+                </div>
                 Performance
               </div>
               <div style={{ 
-                fontSize: '13px', 
-                color: '#856404'
+                fontSize: '14px', 
+                color: '#856404',
+                paddingLeft: '34px'
               }}>
                 Response time under 200ms
               </div>
@@ -522,68 +827,109 @@ const Dashboard: React.FC = () => {
 
         {/* Announcements Section */}
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          marginBottom: '24px'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: '16px',
+          padding: '28px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          position: 'relative',
+          overflow: 'hidden',
+          marginBottom: '32px'
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '100px',
+            height: '100px',
+            background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+            borderRadius: '0 16px 0 100px'
+          }}></div>
+          
           <div style={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center',
-            marginBottom: '20px'
+            marginBottom: '24px'
           }}>
             <h2 style={{ 
               margin: 0, 
-              fontSize: '18px', 
-              color: '#2c3e50',
-              fontWeight: '600',
+              fontSize: '20px', 
+              color: '#1e293b',
+              fontWeight: '700',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '10px'
             }}>
-              <MegaphoneIcon style={{ width: '20px', height: '20px' }} />
+              <div style={{
+                width: '8px',
+                height: '8px',
+                background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+                borderRadius: '50%'
+              }}></div>
               Announcements
             </h2>
             {canCreateAnnouncement && (
               <button
                 onClick={() => setShowAnnouncementModal(true)}
                 style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#ff6b35',
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '10px',
                   fontSize: '14px',
-                  fontWeight: '500',
+                  fontWeight: '600',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '8px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 107, 53, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 107, 53, 0.3)';
                 }}
               >
-                <PlusCircleIcon style={{ width: '16px', height: '16px' }} />
+                <PlusCircleIcon style={{ width: '18px', height: '18px' }} />
                 Create Announcement
               </button>
             )}
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {announcements.length === 0 ? (
               <div style={{
-                padding: '30px',
+                padding: '40px',
                 textAlign: 'center',
-                color: '#6c757d',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #dee2e6'
+                color: '#64748b',
+                background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                borderRadius: '12px',
+                border: '1px solid rgba(0,0,0,0.05)',
+                position: 'relative',
+                overflow: 'hidden'
               }}>
-                <MegaphoneIcon style={{ width: '40px', height: '40px', color: '#ffffff', marginBottom: '15px' }} />
-                <h3 style={{ margin: '0 0 10px 0', color: '#2c3e50' }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px'
+                }}>
+                  <MegaphoneIcon style={{ width: '30px', height: '30px', color: '#64748b' }} />
+                </div>
+                <h3 style={{ margin: '0 0 12px 0', color: '#1e293b', fontSize: '18px', fontWeight: '600' }}>
                   No Announcements Yet
                 </h3>
-                <p style={{ margin: '0', fontSize: '14px' }}>
+                <p style={{ margin: '0', fontSize: '14px', lineHeight: '1.5' }}>
                   {canCreateAnnouncement 
                     ? 'Create your first announcement to keep everyone informed.'
                     : 'No announcements available at this time. Check back later for updates.'
@@ -594,64 +940,86 @@ const Dashboard: React.FC = () => {
               announcements.map(announcement => {
                 return (
                   <div key={announcement.id} style={{
-                    padding: '15px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    borderLeft: '4px solid #6c757d',
-                    border: '1px solid #dee2e6',
+                    padding: '20px',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(0,0,0,0.08)',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                   onClick={() => {
                     setSelectedAnnouncement(announcement);
                     setShowAnnouncementViewModal(true);
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#e9ecef';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f8f9fa';
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '0',
+                      left: '0',
+                      width: '4px',
+                      height: '100%',
+                      background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+                      borderRadius: '12px 0 0 12px'
+                    }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingLeft: '12px' }}>
                       <div style={{ flex: 1 }}>
-                        <h4 style={{ margin: '0 0 5px 0', color: '#2c3e50', fontSize: '14px' }}>
+                        <h4 style={{ margin: '0 0 8px 0', color: '#1e293b', fontSize: '16px', fontWeight: '600' }}>
                           {announcement.title}
                         </h4>
-                        <p style={{ margin: '0', color: '#6c757d', fontSize: '12px' }}>
+                        <p style={{ margin: '0 0 12px 0', color: '#64748b', fontSize: '14px', lineHeight: '1.4' }}>
                           {announcement.message}
                         </p>
-                        <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                          <span style={{
-                            fontSize: '10px',
-                            backgroundColor: '#6c757d',
-                            color: 'white',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            textTransform: 'capitalize'
-                          }}>
-                            {announcement.target_audience}
-                          </span>
-                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <span style={{
+                              fontSize: '12px',
+                              background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+                              color: 'white',
+                              padding: '4px 10px',
+                              borderRadius: '20px',
+                              textTransform: 'capitalize',
+                              fontWeight: '500'
+                            }}>
+                              {announcement.target_audience}
+                            </span>
+                          </div>
                         {canCreateAnnouncement && (
-                          <div style={{ display: 'flex', gap: '5px' }}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEditAnnouncement(announcement);
                               }}
                               style={{
-                                padding: '4px 8px',
-                                backgroundColor: '#17a2b8',
+                                padding: '6px 12px',
+                                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
-                                fontSize: '10px',
-                                cursor: 'pointer'
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
                               }}
                             >
                               Edit
@@ -662,13 +1030,24 @@ const Dashboard: React.FC = () => {
                                 handleDeleteAnnouncement(announcement.id);
                               }}
                               style={{
-                                padding: '4px 8px',
-                                backgroundColor: '#dc3545',
+                                padding: '6px 12px',
+                                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
-                                fontSize: '10px',
-                                cursor: 'pointer'
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
                               }}
                             >
                               Delete
@@ -678,15 +1057,28 @@ const Dashboard: React.FC = () => {
                       </div>
                       </div>
                       <div style={{
-                        fontSize: '11px',
-                        color: '#6c757d',
-                        marginLeft: '10px',
-                        textAlign: 'right'
+                        fontSize: '12px',
+                        color: '#64748b',
+                        marginLeft: '16px',
+                        textAlign: 'right',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px',
+                        minWidth: '120px'
                       }}>
-                        <div>
+                        <div style={{
+                          background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          fontWeight: '500',
+                          color: '#475569'
+                        }}>
                           {new Date(announcement.created_at).toLocaleDateString()}
                         </div>
-                        <div>
+                        <div style={{
+                          fontSize: '11px',
+                          color: '#94a3b8'
+                        }}>
                           {new Date(announcement.created_at).toLocaleTimeString()}
                         </div>
                       </div>

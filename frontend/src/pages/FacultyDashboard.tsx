@@ -170,7 +170,7 @@ const FacultyDashboard: React.FC = () => {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      backgroundColor: '#f8f9fa', 
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', 
       display: 'flex',
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
     }}>
@@ -178,11 +178,14 @@ const FacultyDashboard: React.FC = () => {
       <div 
         style={{
           width: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
-          backgroundColor: '#1a1a1a',
+          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%)',
           color: 'white',
           minHeight: '100vh',
           position: 'fixed',
-          zIndex: 999
+          zIndex: 999,
+          boxShadow: '4px 0 20px rgba(0,0,0,0.3)',
+          borderRight: '1px solid rgba(255,255,255,0.1)',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}
@@ -191,22 +194,49 @@ const FacultyDashboard: React.FC = () => {
         <div style={{ 
           padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '20px',
           textAlign: 'center',
-          borderBottom: '1px solid #34495e',
-          transition: 'padding 0.3s ease'
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <img 
-            src="/1.jpg" 
-            alt="CCS Logo" 
-            style={{
-              width: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
-              height: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: (sidebarCollapsed && !sidebarHovered) ? '1px solid #ff6b35' : '2px solid #ff6b35',
-              marginBottom: '10px',
-              transition: 'all 0.3s ease'
-            }}
-          />
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '60px',
+            height: '60px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.1) 100%)',
+            borderRadius: '0 0 0 60px'
+          }}></div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <img 
+              src="/1.jpg" 
+              alt="CCS Logo" 
+              style={{
+                width: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
+                height: (sidebarCollapsed && !sidebarHovered) ? '30px' : '50px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: (sidebarCollapsed && !sidebarHovered) ? '1px solid #ff6b35' : '2px solid #ff6b35',
+                marginBottom: '10px',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 4px 15px rgba(255,107,53,0.3)'
+              }}
+            />
+            {!(sidebarCollapsed && !sidebarHovered) && (
+              <div style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#ff6b35',
+                marginTop: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}>
+                Faculty Portal
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Burger Button */}
@@ -234,163 +264,449 @@ const FacultyDashboard: React.FC = () => {
 
         {/* Profile Section */}
         <div style={{
-          padding: (sidebarCollapsed && !sidebarHovered) ? '20px 10px' : '30px 20px',
-          borderBottom: '1px solid #34495e',
+          padding: (sidebarCollapsed && !sidebarHovered) ? '20px 15px' : '35px 25px',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
           textAlign: 'center',
-          transition: 'padding 0.3s ease'
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'linear-gradient(135deg, rgba(255,107,53,0.05) 0%, rgba(255,107,53,0.02) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
           <div style={{
-            width: (sidebarCollapsed && !sidebarHovered) ? '40px' : '80px',
-            height: (sidebarCollapsed && !sidebarHovered) ? '40px' : '80px',
-            borderRadius: '50%',
-            backgroundColor: '#ff6b35',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 15px',
-            fontSize: (sidebarCollapsed && !sidebarHovered) ? '16px' : '32px',
-            fontWeight: 'bold',
-            transition: 'all 0.3s ease'
-          }}>
-            {(sidebarCollapsed && !sidebarHovered) ? faculty?.first_name?.[0] : `${faculty?.first_name?.[0]}${faculty?.last_name?.[0]}`}
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '80px',
+            height: '80px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
+            borderRadius: '0 0 80px 0'
+          }}></div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+              width: (sidebarCollapsed && !sidebarHovered) ? '45px' : '85px',
+              height: (sidebarCollapsed && !sidebarHovered) ? '45px' : '85px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+              fontSize: (sidebarCollapsed && !sidebarHovered) ? '18px' : '36px',
+              fontWeight: 'bold',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: '0 8px 25px rgba(255,107,53,0.3)',
+              border: '3px solid rgba(255,255,255,0.2)'
+            }}>
+              {(sidebarCollapsed && !sidebarHovered) ? faculty?.first_name?.[0] || 'F' : `${faculty?.first_name?.[0] || 'F'}${faculty?.last_name?.[0] || 'F'}`}
+            </div>
+            {!(sidebarCollapsed && !sidebarHovered) && (
+              <>
+                <h3 style={{ 
+                  margin: '0 0 8px', 
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#f1f5f9',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                }}>
+                  {faculty?.first_name || 'Faculty'} {faculty?.last_name || 'User'}
+                </h3>
+                <p style={{ 
+                  margin: 0, 
+                  fontSize: '14px',
+                  color: '#94a3b8',
+                  marginBottom: '12px',
+                  fontStyle: 'italic'
+                }}>
+                  {faculty?.email || 'faculty@pnc.edu.ph'}
+                </p>
+                <div style={{
+                  background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+                  color: 'white',
+                  padding: '6px 16px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 15px rgba(255,107,53,0.3)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div style={{
+                    width: '6px',
+                    height: '6px',
+                    background: 'rgba(255,255,255,0.8)',
+                    borderRadius: '50%',
+                    animation: 'pulse 2s infinite'
+                  }}></div>
+                  {faculty?.status === 'active' ? 'Active Faculty' : 'Inactive'}
+                </div>
+              </>
+            )}
           </div>
-          {!(sidebarCollapsed && !sidebarHovered) && (
-            <>
-              <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
-                {faculty?.first_name} {faculty?.last_name}
-              </h3>
-              <p style={{ 
-                margin: 0, 
-                fontSize: '14px', 
-                color: '#bdc3c7',
-                marginBottom: '10px'
-              }}>
-                {faculty?.email}
-              </p>
-              <span style={{
-                backgroundColor: faculty?.status === 'active' ? '#ff6b35' : '#e74c3c',
-                color: faculty?.status === 'active' ? '#ffffff' : '#ffffff',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '12px'
-              }}>
-                {faculty?.status === 'active' ? 'Active' : 'Inactive'}
-              </span>
-            </>
-          )}
         </div>
 
-        {/* Navigation Menu */}
-        <div style={{ flex: 1, padding: '20px 0' }}>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            backgroundColor: '#ff6b35',
-            borderLeft: (sidebarCollapsed && !sidebarHovered) ? 'none' : '4px solid #e55a2b',
-            cursor: 'pointer',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            transition: 'all 0.3s ease',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            <ChartBarIcon style={{ width: '20px', height: '20px' }} />
-            {!(sidebarCollapsed && !sidebarHovered) && " Dashboard"}
+        {/* Scrollable Navigation Menu */}
+        <div style={{ 
+          flex: 1, 
+          overflowY: 'auto', 
+          overflowX: 'hidden',
+          position: 'relative',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+        }}>
+          <div style={{ padding: '15px 0', position: 'relative' }}>
+            <div style={{
+              padding: (sidebarCollapsed && !sidebarHovered) ? '18px 15px' : '18px 25px',
+              margin: (sidebarCollapsed && !sidebarHovered) ? '0 5px 8px 5px' : '0 10px 12px 10px',
+              background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+              borderLeft: '4px solid #ff6b35',
+              borderRadius: '0 12px 12px 0',
+              cursor: 'pointer',
+              textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: (sidebarCollapsed && !sidebarHovered) ? '0' : '15px',
+              justifyContent: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'flex-start',
+              textDecoration: 'none',
+              color: '#ffffff',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: '0 4px 15px rgba(255,107,53,0.3)',
+              transform: 'translateX(5px)',
+              animation: `slideIn 0.3s ease 0s both`
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '28px',
+                height: '28px',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease'
+              }}>
+                <ChartBarIcon style={{ width: '18px', height: '18px', color: '#ffffff' }} />
+              </div>
+              {!(sidebarCollapsed && !sidebarHovered) && (
+                <div style={{
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  letterSpacing: '0.3px'
+                }}>
+                  Dashboard
+                </div>
+              )}
+              <div style={{
+                position: 'absolute',
+                right: '20px',
+                width: '6px',
+                height: '6px',
+                background: '#ffffff',
+                borderRadius: '50%',
+                animation: 'pulse 2s infinite'
+              }}></div>
+            </div>
+            <div style={{
+              padding: (sidebarCollapsed && !sidebarHovered) ? '18px 15px' : '18px 25px',
+              margin: (sidebarCollapsed && !sidebarHovered) ? '0 5px 8px 5px' : '0 10px 12px 10px',
+              background: 'transparent',
+              borderLeft: 'none',
+              borderRadius: '0 12px 12px 0',
+              cursor: 'pointer',
+              textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: (sidebarCollapsed && !sidebarHovered) ? '0' : '15px',
+              justifyContent: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'flex-start',
+              textDecoration: 'none',
+              color: '#cbd5e1',
+              position: 'relative',
+              overflow: 'hidden',
+              transform: 'translateX(0)',
+              animation: `slideIn 0.3s ease 0.05s both`
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)';
+              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.transform = 'translateX(8px)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,107,53,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#cbd5e1';
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            onClick={() => navigate('/faculty-subjects')}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              background: 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease'
+            }}>
+              <BookOpenIcon style={{ width: '18px', height: '18px', color: '#ff6b35' }} />
+            </div>
+            {!(sidebarCollapsed && !sidebarHovered) && (
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '500',
+                letterSpacing: '0.3px'
+              }}>
+                My Courses
+              </div>
+            )}
           </div>
           <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/faculty-subjects')}
+              padding: (sidebarCollapsed && !sidebarHovered) ? '18px 15px' : '18px 25px',
+              margin: (sidebarCollapsed && !sidebarHovered) ? '0 5px 8px 5px' : '0 10px 12px 10px',
+              background: 'transparent',
+              borderLeft: 'none',
+              borderRadius: '0 12px 12px 0',
+              cursor: 'pointer',
+              textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: (sidebarCollapsed && !sidebarHovered) ? '0' : '15px',
+              justifyContent: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'flex-start',
+              textDecoration: 'none',
+              color: '#cbd5e1',
+              position: 'relative',
+              overflow: 'hidden',
+              transform: 'translateX(0)',
+              animation: `slideIn 0.3s ease 0.1s both`
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)';
+              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.transform = 'translateX(8px)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,107,53,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#cbd5e1';
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            onClick={() => navigate('/faculty-schedule')}
           >
-            <BookOpenIcon style={{ width: '20px', height: '20px' }} />
-            {!(sidebarCollapsed && !sidebarHovered) && " My Courses"}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              background: 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease'
+            }}>
+              <CalendarDaysIcon style={{ width: '18px', height: '18px', color: '#ff6b35' }} />
+            </div>
+            {!(sidebarCollapsed && !sidebarHovered) && (
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '500',
+                letterSpacing: '0.3px'
+              }}>
+                Schedule
+              </div>
+            )}
           </div>
           <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/faculty-schedule')}
+              padding: (sidebarCollapsed && !sidebarHovered) ? '18px 15px' : '18px 25px',
+              margin: (sidebarCollapsed && !sidebarHovered) ? '0 5px 8px 5px' : '0 10px 12px 10px',
+              background: 'transparent',
+              borderLeft: 'none',
+              borderRadius: '0 12px 12px 0',
+              cursor: 'pointer',
+              textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: (sidebarCollapsed && !sidebarHovered) ? '0' : '15px',
+              justifyContent: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'flex-start',
+              textDecoration: 'none',
+              color: '#cbd5e1',
+              position: 'relative',
+              overflow: 'hidden',
+              transform: 'translateX(0)',
+              animation: `slideIn 0.3s ease 0.15s both`
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)';
+              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.transform = 'translateX(8px)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,107,53,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#cbd5e1';
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            onClick={() => navigate('/faculty-students')}
           >
-            <CalendarDaysIcon style={{ width: '20px', height: '20px' }} />
-            {!(sidebarCollapsed && !sidebarHovered) && " Schedule"}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              background: 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease'
+            }}>
+              <UserGroupIcon style={{ width: '18px', height: '18px', color: '#ff6b35' }} />
+            </div>
+            {!(sidebarCollapsed && !sidebarHovered) && (
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '500',
+                letterSpacing: '0.3px'
+              }}>
+                Students
+              </div>
+            )}
           </div>
           <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/faculty-students')}
+              padding: (sidebarCollapsed && !sidebarHovered) ? '18px 15px' : '18px 25px',
+              margin: (sidebarCollapsed && !sidebarHovered) ? '0 5px 8px 5px' : '0 10px 12px 10px',
+              background: 'transparent',
+              borderLeft: 'none',
+              borderRadius: '0 12px 12px 0',
+              cursor: 'pointer',
+              textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: (sidebarCollapsed && !sidebarHovered) ? '0' : '15px',
+              justifyContent: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'flex-start',
+              textDecoration: 'none',
+              color: '#cbd5e1',
+              position: 'relative',
+              overflow: 'hidden',
+              transform: 'translateX(0)',
+              animation: `slideIn 0.3s ease 0.2s both`
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)';
+              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.transform = 'translateX(8px)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,107,53,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#cbd5e1';
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            onClick={() => navigate('/faculty-leave-requests')}
           >
-            <UserGroupIcon style={{ width: '20px', height: '20px' }} />
-            {!(sidebarCollapsed && !sidebarHovered) && " Students"}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              background: 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease'
+            }}>
+              <DocumentTextIcon style={{ width: '18px', height: '18px', color: '#ff6b35' }} />
+            </div>
+            {!(sidebarCollapsed && !sidebarHovered) && (
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '500',
+                letterSpacing: '0.3px'
+              }}>
+                Leave Requests
+              </div>
+            )}
           </div>
-          <div style={{
-            padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '15px 20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            textAlign: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'left',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff6b35'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          onClick={() => navigate('/faculty-leave-requests')}
-          >
-            <DocumentTextIcon style={{ width: '20px', height: '20px' }} />
-            {!(sidebarCollapsed && !sidebarHovered) && " Leave Requests"}
           </div>
         </div>
 
         {/* Logout Button */}
-        <div style={{ padding: (sidebarCollapsed && !sidebarHovered) ? '20px 10px' : '20px' }}>
-          <button
-            onClick={handleLogout}
-            style={{
-              width: '100%',
-              padding: (sidebarCollapsed && !sidebarHovered) ? '10px' : '12px',
-              backgroundColor: '#e74c3c',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: (sidebarCollapsed && !sidebarHovered) ? '12px' : '14px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '10px'
-            }}
-          >
-            <ArrowRightOnRectangleIcon style={{ width: '20px', height: '20px' }} />
-            {!(sidebarCollapsed && !sidebarHovered) && " Logout"}
-          </button>
+        <div style={{ 
+          padding: (sidebarCollapsed && !sidebarHovered) ? '20px 15px' : '30px 20px',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          background: 'linear-gradient(135deg, rgba(239,68,68,0.05) 0%, rgba(239,68,68,0.02) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          flexShrink: 0
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '80px',
+            height: '80px',
+            background: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.05) 100%)',
+            borderRadius: '0 0 0 80px'
+          }}></div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <button
+              onClick={handleLogout}
+              style={{
+                width: '100%',
+                padding: (sidebarCollapsed && !sidebarHovered) ? '14px' : '16px',
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: (sidebarCollapsed && !sidebarHovered) ? '13px' : '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: (sidebarCollapsed && !sidebarHovered) ? 'center' : 'flex-start',
+                gap: (sidebarCollapsed && !sidebarHovered) ? '0' : '12px',
+                boxShadow: '0 4px 15px rgba(239,68,68,0.3)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 25px rgba(239,68,68,0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(239,68,68,0.3)';
+              }}
+            >
+              <ArrowRightOnRectangleIcon style={{ 
+                width: (sidebarCollapsed && !sidebarHovered) ? '14px' : '16px', 
+                height: (sidebarCollapsed && !sidebarHovered) ? '14px' : '16px'
+              }} />
+              {!(sidebarCollapsed && !sidebarHovered) && (
+                <div style={{
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  letterSpacing: '0.3px'
+                }}>
+                  Logout
+                </div>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

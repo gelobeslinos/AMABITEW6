@@ -33,9 +33,6 @@ interface StudentProfile {
 }
 
 interface Filters {
-  skill: string;
-  activity: string;
-  affiliation: string;
   search: string;
 }
 
@@ -65,7 +62,7 @@ const StudentProfilingDashboard: React.FC = () => {
   const [profiles, setProfiles] = useState<StudentProfile[]>([]);
   const [students, setStudents] = useState<StudentOption[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<Filters>({ skill: '', activity: '', affiliation: '', search: '' });
+  const [filters, setFilters] = useState<Filters>({ search: '' });
   const [showForm, setShowForm] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<StudentProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState<StudentProfile | null>(null);
@@ -93,6 +90,25 @@ const StudentProfilingDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Real-time search with debounce
+  const [searchTimeout, setSearchTimeout] = useState<number | null>(null);
+  
+  const handleSearchChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, search: value }));
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Set new timeout for search
+    const timeout = setTimeout(() => {
+      void loadProfiles({ search: value });
+    }, 300); // 300ms debounce
+    
+    setSearchTimeout(timeout);
   };
 
   const studentOptions = useMemo(
@@ -143,7 +159,11 @@ const StudentProfilingDashboard: React.FC = () => {
       affiliations: parseList(form.affiliations),
       gpa: form.gpa ? Number(form.gpa) : null,
       career_aspiration: form.career_aspiration,
+      needs_intervention: false, // Required boolean field
     };
+
+    console.log('Submitting payload:', payload);
+    console.log('Form data:', form);
 
     try {
       if (editingProfile) {
@@ -158,6 +178,13 @@ const StudentProfilingDashboard: React.FC = () => {
       await loadProfiles();
     } catch (error) {
       console.error('Save failed', error);
+      // Log detailed error response for debugging
+      if (error instanceof Error && 'response' in error) {
+        const axiosError = error as any;
+        console.error('Error response:', axiosError.response?.data);
+        console.error('Error status:', axiosError.response?.status);
+        console.error('Validation errors:', axiosError.response?.data?.errors);
+      }
       toast.error('Failed to save profile');
     }
   };
@@ -175,149 +202,317 @@ const StudentProfilingDashboard: React.FC = () => {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#111827', margin: 0 }}>
-          Student Profile Module
-        </h1>
-        <p style={{ color: '#6b7280', marginTop: '8px' }}>
+    <div style={{
+      padding: 'clamp(12px, 3vw, 24px)',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      minHeight: '100vh'
+    }}>
+      <div style={{ marginBottom: 'clamp(20px, 4vw, 32px)' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'clamp(12px, 2vw, 16px)',
+          marginBottom: 'clamp(12px, 2vw, 16px)',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{
+            width: 'clamp(10px, 2vw, 12px)',
+            height: 'clamp(10px, 2vw, 12px)',
+            background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+            borderRadius: '50%'
+          }}></div>
+          <h1 style={{ fontSize: 'clamp(20px, 4vw, 32px)', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>
+            Student Profile Module
+          </h1>
+        </div>
+        <p style={{ color: '#64748b', marginTop: 'clamp(6px, 1.5vw, 8px)', fontSize: 'clamp(14px, 2.5vw, 16px)', lineHeight: '1.5' }}>
           Manage comprehensive student data, view profiles, and run filters for skills/activities. 
           <strong>Tip:</strong> Use comma-separated values in filters to search for multiple items (e.g., "Programming, JavaScript, Python").
         </p>
       </div>
 
-      <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '8px' }}>
-        <div style={{ fontSize: '14px', color: '#0369a1', fontWeight: '500', marginBottom: '4px' }}>Quick Filter Examples:</div>
-        <div style={{ fontSize: '12px', color: '#0c4a6e', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
-          <div><strong>Skills:</strong> Programming, JavaScript, Python, React, Data Analysis</div>
-          <div><strong>Activities:</strong> basketball, volunteer, mentor, research</div>
-          <div><strong>Affiliations:</strong> Student Council, Tech Club, Computer Science Society</div>
+      <div style={{ 
+        marginBottom: 'clamp(16px, 3vw, 24px)', 
+        padding: 'clamp(16px, 3vw, 20px)', 
+        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', 
+        border: '1px solid #bae6fd', 
+        borderRadius: 'clamp(10px, 2vw, 12px)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: '80px',
+          height: '80px',
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%)',
+          borderRadius: '0 12px 0 80px'
+        }}></div>
+        <div style={{ fontSize: 'clamp(14px, 2.5vw, 16px)', color: '#0369a1', fontWeight: '600', marginBottom: 'clamp(6px, 1.5vw, 8px)', display: 'flex', alignItems: 'center', gap: 'clamp(6px, 1.5vw, 8px)' }}>
+          <div style={{
+            width: 'clamp(6px, 1.5vw, 8px)',
+            height: 'clamp(6px, 1.5vw, 8px)',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            borderRadius: '50%'
+          }}></div>
+          Quick Filter Examples
+        </div>
+        <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#0c4a6e', display: 'flex', flexDirection: 'column', gap: 'clamp(6px, 1.5vw, 8px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Try searching:</span>
+            <span>"Programming", "JavaScript", "Python", "React", "Data Analysis"</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Activities:</span>
+            <span>"basketball", "volunteer", "mentor", "research"</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Affiliations:</span>
+            <span>"Student Council", "Tech Club", "Computer Science Society"</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Student Info:</span>
+            <span>Student names and IDs</span>
+          </div>
         </div>
       </div>
 
-      <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '4px' }}>
-            Skills (comma-separated)
+      <div style={{ 
+        marginBottom: 'clamp(20px, 4vw, 32px)',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        borderRadius: 'clamp(12px, 2.5vw, 16px)',
+        padding: 'clamp(20px, 4vw, 28px)',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(0,0,0,0.05)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: '100px',
+          height: '100px',
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%)',
+          borderRadius: '0 16px 0 100px'
+        }}></div>
+        
+        <h3 style={{ 
+          fontSize: 'clamp(16px, 3vw, 18px)', 
+          fontWeight: '600', 
+          color: '#1e293b', 
+          marginBottom: 'clamp(16px, 3vw, 20px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'clamp(8px, 2vw, 10px)',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{
+            width: 'clamp(6px, 1.5vw, 8px)',
+            height: 'clamp(6px, 1.5vw, 8px)',
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            borderRadius: '50%'
+          }}></div>
+          Filter Student Profiles
+        </h3>
+        
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <label style={{ display: 'block', fontSize: 'clamp(13px, 2.5vw, 15px)', fontWeight: '600', color: '#374151', marginBottom: 'clamp(10px, 2vw, 12px)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(6px, 1.5vw, 8px)' }}>
+              <div style={{
+                width: 'clamp(6px, 1.5vw, 8px)',
+                height: 'clamp(6px, 1.5vw, 8px)',
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                borderRadius: '50%'
+              }}></div>
+              Search Student Profiles
+            </div>
           </label>
-          <input 
-            placeholder="e.g. Programming, JavaScript, Python" 
-            value={filters.skill} 
-            onChange={(e) => setFilters((prev) => ({ ...prev, skill: e.target.value }))}
-            style={{
-              padding: '12px 16px',
-              border: '1px solid #d1d5db',
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              position: 'absolute',
+              left: 'clamp(12px, 3vw, 16px)',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              fontSize: 'clamp(16px, 3vw, 18px)',
+              color: '#6366f1',
+              pointerEvents: 'none'
+            }}>
+              🔍
+            </div>
+            <input 
+              placeholder="Search by name, student ID, skills, activities, or affiliations..." 
+              value={filters.search} 
+              onChange={(e) => handleSearchChange(e.target.value)}
+              style={{
+                width: '100%',
+                padding: 'clamp(12px, 3vw, 16px) clamp(12px, 3vw, 16px) clamp(12px, 3vw, 16px) clamp(40px, 8vw, 50px)',
+                border: '2px solid #e5e7eb',
+                borderRadius: 'clamp(10px, 2vw, 12px)',
+                fontSize: 'clamp(14px, 2.5vw, 16px)',
+                transition: 'all 0.3s ease',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 15px rgba(99, 102, 241, 0.15)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#e5e7eb';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
+              }}
+            />
+          </div>
+          {filters.search && (
+            <div style={{
+              marginTop: '12px',
+              padding: '8px 16px',
+              background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
               borderRadius: '8px',
-              fontSize: '14px'
-            }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '4px' }}>
-            Activities (comma-separated)
-          </label>
-          <input 
-            placeholder="e.g. basketball, volunteer, mentor" 
-            value={filters.activity} 
-            onChange={(e) => setFilters((prev) => ({ ...prev, activity: e.target.value }))}
-            style={{
-              padding: '12px 16px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '14px'
-            }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '4px' }}>
-            Affiliations (comma-separated)
-          </label>
-          <input 
-            placeholder="e.g. Student Council, Tech Club" 
-            value={filters.affiliation} 
-            onChange={(e) => setFilters((prev) => ({ ...prev, affiliation: e.target.value }))}
-            style={{
-              padding: '12px 16px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '14px'
-            }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '4px' }}>
-            Search name / student ID
-          </label>
-          <input 
-            placeholder="Search students..." 
-            value={filters.search} 
-            onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-            style={{
-              padding: '12px 16px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '14px'
-            }}
-          />
+              border: '1px solid #bae6fd',
+              fontSize: '13px',
+              color: '#0369a1',
+              textAlign: 'center'
+            }}>
+              <span>Searching for: </span>
+              <strong>"{filters.search}"</strong>
+              {profiles.length > 0 && (
+                <span style={{ marginLeft: '8px', color: '#059669' }}>
+                  ({profiles.length} result{profiles.length !== 1 ? 's' : ''} found)
+                </span>
+              )}
+            </div>
+          )}
+          <div style={{
+            marginTop: '12px',
+            fontSize: '13px',
+            color: '#64748b',
+            textAlign: 'center',
+            fontStyle: 'italic'
+          }}>
+            💡 Tip: Search for anything - skills like "JavaScript", activities like "basketball", or affiliations like "Student Council"
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: 'clamp(12px, 2vw, 16px)', 
+        marginBottom: 'clamp(20px, 4vw, 32px)', 
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+      }}>
         <button 
           onClick={() => loadProfiles()}
           style={{
-            padding: '12px 20px',
-            backgroundColor: '#3b82f6',
+            padding: 'clamp(12px, 2.5vw, 14px) clamp(20px, 4vw, 28px)',
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
             color: 'white',
             border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            fontSize: 'clamp(13px, 2.5vw, 15px)',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(6px, 1.5vw, 8px)',
+            flex: '1',
+            minWidth: '120px'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 25px rgba(99, 102, 241, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.3)';
           }}
         >
-          Apply Filters
+          <span>🔍</span> Apply Filters
         </button>
         <button
           onClick={() => {
-            const cleared = { skill: '', activity: '', affiliation: '', search: '' };
+            const cleared = { search: '' };
             setFilters(cleared);
             void loadProfiles(cleared);
           }}
           style={{
-            padding: '12px 20px',
-            backgroundColor: '#f3f4f6',
-            color: '#374151',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
+            padding: 'clamp(12px, 2.5vw, 14px) clamp(20px, 4vw, 28px)',
+            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+            color: '#475569',
+            border: '2px solid #e2e8f0',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            fontSize: 'clamp(13px, 2.5vw, 15px)',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(6px, 1.5vw, 8px)',
+            flex: '1',
+            minWidth: '120px'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
+            e.currentTarget.style.borderColor = '#cbd5e1';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+            e.currentTarget.style.borderColor = '#e2e8f0';
           }}
         >
-          Clear
+          <span>🔄</span> Clear
         </button>
         <button 
           onClick={openCreate}
           style={{
-            padding: '12px 20px',
-            backgroundColor: '#10b981',
+            padding: 'clamp(12px, 2.5vw, 14px) clamp(20px, 4vw, 28px)',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: 'white',
             border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
+            borderRadius: 'clamp(10px, 2vw, 12px)',
+            fontSize: 'clamp(13px, 2.5vw, 15px)',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(6px, 1.5vw, 8px)',
+            flex: '1',
+            minWidth: '120px'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
           }}
         >
-          Add Student Profile
+          <span>➕</span> Add Student Profile
         </button>
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '256px' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '256px',
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: '16px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+        }}>
           <div style={{ 
-            border: '4px solid #3b82f6',
+            border: '4px solid #6366f1',
             borderTop: '4px solid transparent',
             borderRadius: '50%',
             width: '48px',
@@ -327,124 +522,332 @@ const StudentProfilingDashboard: React.FC = () => {
         </div>
       ) : (
         <div style={{ 
-          backgroundColor: 'white', 
-          borderRadius: '8px', 
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          overflow: 'hidden'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', 
+          borderRadius: '16px', 
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          overflow: 'hidden',
+          position: 'relative'
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '150px',
+            height: '150px',
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%)',
+            borderRadius: '0 16px 0 150px'
+          }}></div>
+          
+          <table style={{ width: '100%', borderCollapse: 'collapse', position: 'relative', zIndex: 1 }}>
+            <thead style={{ 
+              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', 
+              borderBottom: '2px solid #e2e8f0'
+            }}>
               <tr>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
-                  Student
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  fontSize: '13px', 
+                  fontWeight: '600', 
+                  color: '#1e293b', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '6px',
+                      height: '6px',
+                      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                      borderRadius: '50%'
+                    }}></div>
+                    Student
+                  </div>
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
-                  Academic History
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  fontSize: '13px', 
+                  fontWeight: '600', 
+                  color: '#1e293b', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '6px',
+                      height: '6px',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      borderRadius: '50%'
+                    }}></div>
+                    Academic History
+                  </div>
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
-                  Non-Academic Activities
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  fontSize: '13px', 
+                  fontWeight: '600', 
+                  color: '#1e293b', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '6px',
+                      height: '6px',
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                      borderRadius: '50%'
+                    }}></div>
+                    Activities
+                  </div>
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
-                  Skills
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  fontSize: '13px', 
+                  fontWeight: '600', 
+                  color: '#1e293b', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '6px',
+                      height: '6px',
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      borderRadius: '50%'
+                    }}></div>
+                    Skills
+                  </div>
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
-                  Affiliations
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  fontSize: '13px', 
+                  fontWeight: '600', 
+                  color: '#1e293b', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '6px',
+                      height: '6px',
+                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                      borderRadius: '50%'
+                    }}></div>
+                    Affiliations
+                  </div>
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
-                  Actions
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  fontSize: '13px', 
+                  fontWeight: '600', 
+                  color: '#1e293b', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '6px',
+                      height: '6px',
+                      background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+                      borderRadius: '50%'
+                    }}></div>
+                    Actions
+                  </div>
                 </th>
               </tr>
             </thead>
             <tbody style={{ backgroundColor: 'white' }}>
-              {profiles.map((profile) => (
-                <tr key={profile.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>
+              {profiles.map((profile, index) => (
+                <tr 
+                  key={profile.id} 
+                  style={{ 
+                    borderBottom: '1px solid #f1f5f9',
+                    transition: 'all 0.3s ease',
+                    background: index % 2 === 0 ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)';
+                    e.currentTarget.style.transform = 'translateX(4px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = index % 2 === 0 ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                  }}
+                >
+                  <td style={{ padding: '20px' }}>
+                    <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
                       {profile.student.full_name}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
+                    <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        borderRadius: '50%'
+                      }}></div>
                       {profile.student.student_id}
                     </div>
                   </td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontSize: '14px', color: '#111827', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={profile.academic_profile.academic_history || 'N/A'}>
+                  <td style={{ padding: '20px' }}>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: '#374151', 
+                      maxWidth: '250px', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(34, 197, 94, 0.2)'
+                    }} title={profile.academic_profile.academic_history || 'N/A'}>
                       {profile.academic_profile.academic_history || 'N/A'}
                     </div>
                   </td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontSize: '14px', color: '#111827', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={profile.activities.non_academic_activities || 'N/A'}>
+                  <td style={{ padding: '20px' }}>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: '#374151', 
+                      maxWidth: '250px', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(245, 158, 11, 0.2)'
+                    }} title={profile.activities.non_academic_activities || 'N/A'}>
                       {profile.activities.non_academic_activities || 'N/A'}
                     </div>
                   </td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontSize: '14px', color: '#111827', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={(profile.activities.skills || []).join(', ') || 'N/A'}>
+                  <td style={{ padding: '20px' }}>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: '#374151', 
+                      maxWidth: '200px', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(139, 92, 246, 0.2)'
+                    }} title={(profile.activities.skills || []).join(', ') || 'N/A'}>
                       {(profile.activities.skills || []).join(', ') || 'N/A'}
                     </div>
                   </td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontSize: '14px', color: '#111827', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={(profile.activities.affiliations || []).join(', ') || 'N/A'}>
+                  <td style={{ padding: '20px' }}>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: '#374151', 
+                      maxWidth: '200px', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      padding: '8px 12px',
+                      background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(239, 68, 68, 0.2)'
+                    }} title={(profile.activities.affiliations || []).join(', ') || 'N/A'}>
                       {(profile.activities.affiliations || []).join(', ') || 'N/A'}
                     </div>
                   </td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                  <td style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                       <button 
                         onClick={() => setSelectedProfile(profile)}
                         style={{
-                          color: '#3b82f6',
-                          backgroundColor: 'transparent',
+                          padding: '10px 14px',
+                          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                          color: 'white',
                           border: 'none',
                           cursor: 'pointer',
-                          padding: '4px',
-                          borderRadius: '4px',
+                          borderRadius: '8px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'center',
+                          gap: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          transition: 'all 0.3s ease',
+                          boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
                         }}
                         title="View Profile"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
+                        }}
                       >
-                        <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
+                        <span>View</span>
                       </button>
                       <button 
                         onClick={() => openEdit(profile)}
                         style={{
-                          color: '#3b82f6',
-                          backgroundColor: 'transparent',
+                          padding: '10px 14px',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: 'white',
                           border: 'none',
                           cursor: 'pointer',
-                          padding: '4px',
-                          borderRadius: '4px',
+                          borderRadius: '8px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'center',
+                          gap: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          transition: 'all 0.3s ease',
+                          boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
                         }}
                         title="Edit Profile"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.3)';
+                        }}
                       >
-                        <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <span>Edit</span>
                       </button>
                       <button 
                         onClick={() => void deleteProfile(profile)}
                         style={{
-                          color: '#ef4444',
-                          backgroundColor: 'transparent',
+                          padding: '10px 14px',
+                          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                          color: 'white',
                           border: 'none',
                           cursor: 'pointer',
-                          padding: '4px',
-                          borderRadius: '4px',
+                          borderRadius: '8px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'center',
+                          gap: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          transition: 'all 0.3s ease',
+                          boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
                         }}
                         title="Delete Profile"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
+                        }}
                       >
-                        <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <span>Delete</span>
                       </button>
                     </div>
                   </td>
@@ -459,40 +862,87 @@ const StudentProfilingDashboard: React.FC = () => {
         <div style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 50
+          zIndex: 50,
+          animation: 'fadeIn 0.3s ease'
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            borderRadius: '16px',
             width: '90%',
-            maxWidth: '600px',
+            maxWidth: '700px',
             maxHeight: '90vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            position: 'relative',
+            animation: 'slideUp 0.3s ease'
           }}>
-            <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827', margin: 0 }}>
-                {editingProfile ? 'Edit Profile' : 'Add Profile'}
-              </h2>
+            <div style={{
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              width: '120px',
+              height: '120px',
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%)',
+              borderRadius: '0 16px 0 120px'
+            }}></div>
+            
+            <div style={{ 
+              padding: '32px', 
+              borderBottom: '1px solid #e2e8f0',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '10px',
+                  height: '10px',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  borderRadius: '50%'
+                }}></div>
+                <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+                  {editingProfile ? 'Edit Student Profile' : 'Add New Student Profile'}
+                </h2>
+              </div>
             </div>
-            <form onSubmit={submitForm} style={{ padding: '24px' }}>
-              <div style={{ display: 'grid', gap: '16px' }}>
+            <form onSubmit={submitForm} style={{ padding: '32px', position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'grid', gap: '24px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Student
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      Student
+                    </div>
                   </label>
                   <select 
                     value={form.student_id} 
                     onChange={(e) => setForm((prev) => ({ ...prev, student_id: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#6366f1';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   >
                     <option value="">Select student</option>
@@ -502,102 +952,200 @@ const StudentProfilingDashboard: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Academic History
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      Academic History
+                    </div>
                   </label>
                   <textarea 
-                    placeholder="Academic history" 
+                    placeholder="Enter academic history..." 
                     value={form.academic_history} 
                     onChange={(e) => setForm((prev) => ({ ...prev, academic_history: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      minHeight: '80px',
-                      resize: 'vertical'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      minHeight: '100px',
+                      resize: 'vertical',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Non-Academic Activities
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      Non-Academic Activities
+                    </div>
                   </label>
                   <textarea 
-                    placeholder="Non-academic activities" 
+                    placeholder="Enter non-academic activities..." 
                     value={form.non_academic_activities} 
                     onChange={(e) => setForm((prev) => ({ ...prev, non_academic_activities: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      minHeight: '80px',
-                      resize: 'vertical'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      minHeight: '100px',
+                      resize: 'vertical',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#f59e0b';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Violations
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      Violations
+                    </div>
                   </label>
                   <textarea 
-                    placeholder="Violations" 
+                    placeholder="Enter any violations..." 
                     value={form.violations} 
                     onChange={(e) => setForm((prev) => ({ ...prev, violations: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      minHeight: '80px',
-                      resize: 'vertical'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      minHeight: '100px',
+                      resize: 'vertical',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#ef4444';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Skills (comma-separated)
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      Skills (comma-separated)
+                    </div>
                   </label>
                   <input 
-                    placeholder="Skills (comma-separated)" 
+                    placeholder="e.g. Programming, JavaScript, Python" 
                     value={form.skills} 
                     onChange={(e) => setForm((prev) => ({ ...prev, skills: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#8b5cf6';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Affiliations (comma-separated)
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      Affiliations (comma-separated)
+                    </div>
                   </label>
                   <input 
-                    placeholder="Affiliations (comma-separated)" 
+                    placeholder="e.g. Student Council, Tech Club" 
                     value={form.affiliations} 
                     onChange={(e) => setForm((prev) => ({ ...prev, affiliations: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#ef4444';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    GPA
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      GPA
+                    </div>
                   </label>
                   <input 
-                    placeholder="GPA" 
+                    placeholder="Enter GPA (0.0 - 4.0)" 
                     type="number" 
                     min="0" 
                     max="4" 
@@ -606,62 +1154,117 @@ const StudentProfilingDashboard: React.FC = () => {
                     onChange={(e) => setForm((prev) => ({ ...prev, gpa: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#f59e0b';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-                    Career Aspiration
+                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '6px',
+                        height: '6px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        borderRadius: '50%'
+                      }}></div>
+                      Career Aspiration
+                    </div>
                   </label>
                   <input 
-                    placeholder="Career aspiration" 
+                    placeholder="Enter career aspiration..." 
                     value={form.career_aspiration} 
                     onChange={(e) => setForm((prev) => ({ ...prev, career_aspiration: e.target.value }))}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
+                      padding: '14px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '15px',
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e2e8f0' }}>
                 <button 
                   type="button" 
                   onClick={() => setShowForm(false)}
                   style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#f3f4f6',
-                    color: '#374151',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
+                    padding: '14px 32px',
+                    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                    color: '#475569',
+                    border: '2px solid #e2e8f0',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
+                    e.currentTarget.style.borderColor = '#cbd5e1';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
                   }}
                 >
-                  Cancel
+                  <span>❌</span> Cancel
                 </button>
                 <button 
                   type="submit"
                   style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#3b82f6',
+                    padding: '14px 32px',
+                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(99, 102, 241, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.3)';
                   }}
                 >
-                  Save
+                  <span>💾</span> {editingProfile ? 'Update Profile' : 'Create Profile'}
                 </button>
               </div>
             </form>

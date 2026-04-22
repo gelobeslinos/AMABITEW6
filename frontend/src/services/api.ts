@@ -101,9 +101,7 @@ export const studentProfileService = {
     if (filters?.gpa_max) params.append('gpa_max', filters.gpa_max);
     if (filters?.needs_intervention) params.append('needs_intervention', filters.needs_intervention);
     if (filters?.learning_style) params.append('learning_style', filters.learning_style);
-    if (filters?.skill) params.append('skill', filters.skill);
-    if (filters?.activity) params.append('activity', filters.activity);
-    if (filters?.affiliation) params.append('affiliation', filters.affiliation);
+    // Unified search - searches across name, student_id, skills, activities, and affiliations
     if (filters?.search) params.append('search', filters.search);
 
     return api.get(`/student-profiles?${params.toString()}`).then(res => res.data.data || res.data);

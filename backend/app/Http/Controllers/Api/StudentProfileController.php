@@ -53,7 +53,29 @@ class StudentProfileController extends Controller
         }
 
         if ($request->has('search')) {
-            $query->byStudentSearch($request->input('search'));
+            $searchTerm = $request->input('search');
+            $query->where(function ($subQuery) use ($searchTerm) {
+                // Search in student info (name, student_id)
+                $subQuery->whereHas('student', function ($studentQuery) use ($searchTerm) {
+                    $studentQuery->where(function ($innerQuery) use ($searchTerm) {
+                        $innerQuery->where('first_name', 'like', "%{$searchTerm}%")
+                                ->orWhere('last_name', 'like', "%{$searchTerm}%")
+                                ->orWhere('student_id', 'like', "%{$searchTerm}%");
+                    });
+                })
+                // Search in skills (JSON field)
+                ->orWhereJsonContains('skills', $searchTerm)
+                // Search in non_academic_activities (text field)
+                ->orWhere('non_academic_activities', 'like', "%{$searchTerm}%")
+                // Search in affiliations (JSON field)
+                ->orWhereJsonContains('affiliations', $searchTerm)
+                // Search in extracurricular_activities (JSON field)
+                ->orWhereJsonContains('extracurricular_activities', $searchTerm)
+                // Search in career_aspiration
+                ->orWhere('career_aspiration', 'like', "%{$searchTerm}%")
+                // Search in academic_history
+                ->orWhere('academic_history', 'like', "%{$searchTerm}%");
+            });
         }
 
         $profiles = $query->paginate(2000);
@@ -79,7 +101,7 @@ class StudentProfileController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students',
+            'student_id' => 'required|exists:students,id',
             'learning_style' => 'nullable|string',
             'academic_strengths' => 'nullable|string',
             'academic_weaknesses' => 'nullable|string',

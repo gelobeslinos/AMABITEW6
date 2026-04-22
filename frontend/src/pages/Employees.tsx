@@ -179,25 +179,64 @@ const Employees: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '256px' }}>
+      <div style={{ 
+        padding: 'clamp(12px, 3vw, 24px)',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        minHeight: '100vh'
+      }}>
         <div style={{ 
-          border: '4px solid #3b82f6',
-          borderTop: '4px solid transparent',
-          borderRadius: '50%',
-          width: '48px',
-          height: '48px',
-          animation: 'spin 1s linear infinite'
-        }}></div>
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '256px' 
+        }}>
+          <div style={{ 
+            border: '4px solid #3b82f6',
+            borderTop: '4px solid transparent',
+            borderRadius: '50%',
+            width: '48px',
+            height: '48px',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#111827', margin: 0 }}>
-          Employees
-        </h1>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 'clamp(20px, 4vw, 32px)',
+        flexWrap: 'wrap',
+        gap: 'clamp(12px, 2vw, 20px)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'clamp(12px, 2vw, 16px)'
+        }}>
+          <div style={{
+            width: 'clamp(10px, 2vw, 12px)',
+            height: 'clamp(10px, 2vw, 12px)',
+            background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+            borderRadius: '50%'
+          }}></div>
+          <h1 style={{ 
+            fontSize: 'clamp(20px, 4vw, 28px)', 
+            fontWeight: 'bold', 
+            color: '#1e293b', 
+            margin: 0,
+            background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Employees
+          </h1>
+        </div>
         <button
           onClick={() => {
             resetForm();
@@ -205,24 +244,49 @@ const Employees: React.FC = () => {
             setShowModal(true);
           }}
           style={{
-            backgroundColor: '#3b82f6',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: 'white',
-            padding: '8px 16px',
-            borderRadius: '8px',
+            padding: 'clamp(12px, 2.5vw, 16px) clamp(20px, 4vw, 28px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
             border: 'none',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            fontSize: '14px'
+            fontSize: 'clamp(13px, 2.5vw, 15px)',
+            fontWeight: '600',
+            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            gap: 'clamp(6px, 1.5vw, 8px)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
           }}
         >
-          <span style={{ marginRight: '8px' }}>+</span>
+          <span style={{ fontSize: 'clamp(16px, 3vw, 20px)' }}>+</span>
           Add Employee
         </button>
       </div>
 
-      <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-        <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ 
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        borderRadius: 'clamp(12px, 2vw, 16px)',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        <div style={{ 
+          padding: 'clamp(16px, 3vw, 24px)', 
+          borderBottom: '1px solid rgba(229, 231, 235, 0.5)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(248,250,252,0.8) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
           <div style={{ position: 'relative' }}>
             <input
               type="text"
@@ -230,21 +294,34 @@ const Employees: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
-                paddingLeft: '40px',
-                paddingRight: '16px',
-                padding: '8px 16px',
+                paddingLeft: 'clamp(40px, 8vw, 50px)',
+                paddingRight: 'clamp(16px, 3vw, 24px)',
+                padding: 'clamp(12px, 2.5vw, 16px) clamp(16px, 3vw, 24px)',
                 width: '100%',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '14px'
+                border: '2px solid #e5e7eb',
+                borderRadius: 'clamp(10px, 2vw, 12px)',
+                fontSize: 'clamp(14px, 2.5vw, 16px)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1), 0 4px 15px rgba(16, 185, 129, 0.15)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#e5e7eb';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
               }}
             />
             <div style={{
               position: 'absolute',
-              left: '12px',
+              left: 'clamp(12px, 3vw, 16px)',
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#9ca3af'
+              color: '#10b981',
+              fontSize: 'clamp(16px, 3vw, 18px)',
+              pointerEvents: 'none'
             }}>
               🔍
             </div>
@@ -253,29 +330,80 @@ const Employees: React.FC = () => {
 
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ backgroundColor: '#f9fafb' }}>
+            <thead style={{ 
+              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+              borderBottom: '2px solid rgba(255,107,53,0.1)'
+            }}>
               <tr>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
+                <th style={{ 
+                  padding: 'clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px)', 
+                  textAlign: 'left', 
+                  fontSize: 'clamp(11px, 2vw, 12px)', 
+                  fontWeight: '600', 
+                  color: '#475569', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
                   Name
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
+                <th style={{ 
+                  padding: 'clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px)', 
+                  textAlign: 'left', 
+                  fontSize: 'clamp(11px, 2vw, 12px)', 
+                  fontWeight: '600', 
+                  color: '#475569', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
                   Email
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
+                <th style={{ 
+                  padding: 'clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px)', 
+                  textAlign: 'left', 
+                  fontSize: 'clamp(11px, 2vw, 12px)', 
+                  fontWeight: '600', 
+                  color: '#475569', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
                   Position
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
+                <th style={{ 
+                  padding: 'clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px)', 
+                  textAlign: 'left', 
+                  fontSize: 'clamp(11px, 2vw, 12px)', 
+                  fontWeight: '600', 
+                  color: '#475569', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
                   Date Created
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
+                <th style={{ 
+                  padding: 'clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px)', 
+                  textAlign: 'left', 
+                  fontSize: 'clamp(11px, 2vw, 12px)', 
+                  fontWeight: '600', 
+                  color: '#475569', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
                   Status
                 </th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>
+                <th style={{ 
+                  padding: 'clamp(12px, 2vw, 16px) clamp(16px, 3vw, 20px)', 
+                  textAlign: 'left', 
+                  fontSize: 'clamp(11px, 2vw, 12px)', 
+                  fontWeight: '600', 
+                  color: '#475569', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+            <tbody style={{ backgroundColor: 'white' }}>
               {filteredEmployees.map((employee) => (
                 <tr key={employee.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                   <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>

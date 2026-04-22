@@ -127,18 +127,21 @@ const FacultySubjects: React.FC = () => {
   return (
     <div style={{
       display: 'flex',
-      backgroundColor: '#f8f9fa', 
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', 
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
     }}>
       {/* Sidebar */}
       <div 
         style={{
           width: (sidebarCollapsed && !sidebarHovered) ? '80px' : '280px',
-          backgroundColor: '#1a1a1a',
+          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%)',
           color: 'white',
           minHeight: '100vh',
           position: 'fixed',
-          zIndex: 999
+          zIndex: 999,
+          boxShadow: '4px 0 20px rgba(0,0,0,0.3)',
+          borderRight: '1px solid rgba(255,255,255,0.1)',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}
@@ -147,9 +150,22 @@ const FacultySubjects: React.FC = () => {
         <div style={{ 
           padding: (sidebarCollapsed && !sidebarHovered) ? '15px 10px' : '20px',
           textAlign: 'center',
-          borderBottom: '1px solid #34495e',
-          transition: 'padding 0.3s ease'
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '60px',
+            height: '60px',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)',
+            borderRadius: '0 0 0 60px'
+          }}></div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
           <img 
             src="/1.jpg" 
             alt="CCS Logo" 
@@ -163,6 +179,19 @@ const FacultySubjects: React.FC = () => {
               transition: 'all 0.3s ease'
             }}
           />
+            {!(sidebarCollapsed && !sidebarHovered) && (
+              <div style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#8b5cf6',
+                marginTop: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}>
+                Faculty Subjects
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Burger Button */}

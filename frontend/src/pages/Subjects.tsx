@@ -3,8 +3,7 @@ import { subjectService } from '../services/api';
 import { useToast } from '../components/ToastProvider';
 import {
   BookOpenIcon,
-  PlusCircleIcon,
-  CheckCircleIcon,
+    CheckCircleIcon,
   PencilIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
@@ -117,45 +116,79 @@ const Subjects: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '24px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+    <div style={{ 
+      padding: 'clamp(12px, 3vw, 24px)',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      minHeight: '100vh'
+    }}>
       {/* Header */}
       <div style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        padding: '24px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        marginBottom: '24px'
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        borderRadius: 'clamp(12px, 2vw, 16px)',
+        padding: 'clamp(20px, 4vw, 32px)',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+        marginBottom: 'clamp(20px, 4vw, 32px)',
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 'clamp(12px, 2vw, 20px)'
         }}>
-          <h1 style={{
-            margin: 0,
-            color: '#2c3e50',
-            fontSize: '28px',
-            fontWeight: 'bold'
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(12px, 2vw, 16px)'
           }}>
-            Subjects Management
-          </h1>
+            <div style={{
+              width: 'clamp(10px, 2vw, 12px)',
+              height: 'clamp(10px, 2vw, 12px)',
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+              borderRadius: '50%'
+            }}></div>
+            <h1 style={{
+              margin: 0,
+              fontSize: 'clamp(20px, 4vw, 28px)',
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              Subjects Management
+            </h1>
+          </div>
           <button
             onClick={() => setShowForm(true)}
             style={{
-              padding: '12px 24px',
-              backgroundColor: '#ff6b35',
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
               color: 'white',
+              padding: 'clamp(12px, 2.5vw, 16px) clamp(20px, 4vw, 28px)',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: 'clamp(10px, 2vw, 12px)',
+              fontSize: 'clamp(13px, 2.5vw, 15px)',
+              fontWeight: '600',
               cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              fontSize: '16px',
-              fontWeight: '600'
+              gap: 'clamp(6px, 1.5vw, 8px)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(139, 92, 246, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(139, 92, 246, 0.3)';
             }}
           >
-            <PlusCircleIcon style={{ width: '20px', height: '20px' }} />
+            <span style={{ fontSize: 'clamp(16px, 3vw, 20px)' }}>+</span>
             Add Subject
           </button>
         </div>

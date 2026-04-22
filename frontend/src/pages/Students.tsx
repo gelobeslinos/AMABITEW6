@@ -189,18 +189,56 @@ const Students: React.FC = () => {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#111827', margin: 0 }}>
-          Students
-        </h1>
-        <p style={{ color: '#6b7280', marginTop: '8px' }}>
+    <div style={{ 
+      padding: 'clamp(12px, 3vw, 24px)',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      minHeight: '100vh'
+    }}>
+      <div style={{ marginBottom: 'clamp(20px, 4vw, 32px)' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'clamp(12px, 2vw, 16px)'
+        }}>
+          <div style={{
+            width: 'clamp(10px, 2vw, 12px)',
+            height: 'clamp(10px, 2vw, 12px)',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            borderRadius: '50%'
+          }}></div>
+          <h1 style={{ 
+            fontSize: 'clamp(20px, 4vw, 28px)', 
+            fontWeight: 'bold', 
+            color: '#1e293b', 
+            margin: 0,
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Students
+          </h1>
+        </div>
+        <p style={{ 
+          color: '#64748b', 
+          marginTop: 'clamp(6px, 1.5vw, 8px)', 
+          fontSize: 'clamp(14px, 2.5vw, 16px)', 
+          lineHeight: '1.5',
+          marginLeft: 'clamp(22px, 4vw, 28px)'
+        }}>
           Manage CSS department students
         </p>
       </div>
 
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div style={{ flex: '1', minWidth: '300px' }}>
+      <div style={{ 
+        marginBottom: 'clamp(20px, 4vw, 32px)', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: 'clamp(12px, 2vw, 20px)' 
+      }}>
+        <div style={{ flex: '1', minWidth: '300px', position: 'relative' }}>
           <input
             type="text"
             placeholder="Search students..."
@@ -208,12 +246,34 @@ const Students: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '12px 16px',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '14px'
+              padding: 'clamp(12px, 2.5vw, 16px) clamp(40px, 8vw, 50px)',
+              border: '2px solid #e5e7eb',
+              borderRadius: 'clamp(10px, 2vw, 12px)',
+              fontSize: 'clamp(14px, 2.5vw, 16px)',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+              transition: 'all 0.3s ease'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#3b82f6';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 15px rgba(59, 130, 246, 0.15)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
             }}
           />
+          <div style={{
+            position: 'absolute',
+            right: 'clamp(12px, 3vw, 16px)',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#3b82f6',
+            fontSize: 'clamp(16px, 3vw, 18px)',
+            pointerEvents: 'none'
+          }}>
+            🔍
+          </div>
         </div>
         <button
           onClick={() => {
@@ -221,25 +281,41 @@ const Students: React.FC = () => {
             setShowModal(true);
           }}
           style={{
-            padding: '12px 20px',
-            backgroundColor: '#10b981',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: 'white',
+            padding: 'clamp(12px, 2.5vw, 16px) clamp(20px, 4vw, 28px)',
+            borderRadius: 'clamp(10px, 2vw, 12px)',
             border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
+            fontSize: 'clamp(13px, 2.5vw, 15px)',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'clamp(6px, 1.5vw, 8px)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
           }}
         >
+          <span style={{ fontSize: 'clamp(16px, 3vw, 20px)' }}>+</span>
           Add Student & Create Account
         </button>
       </div>
 
       <div style={{ 
-        backgroundColor: 'white', 
-        borderRadius: '8px', 
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-        overflow: 'hidden'
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        borderRadius: 'clamp(12px, 2vw, 16px)',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+        overflow: 'hidden',
+        position: 'relative'
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
