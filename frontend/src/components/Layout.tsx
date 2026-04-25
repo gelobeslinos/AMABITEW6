@@ -9,18 +9,45 @@ import {
   ArrowRightOnRectangleIcon,
   BookOpenIcon,
   UserCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Bars3Icon,
+  XMarkIcon,
+  BuildingOfficeIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon },
-  { name: 'Employees', href: '/employees', icon: UserGroupIcon },
-  { name: 'Students', href: '/students', icon: UserGroupIcon },
-  { name: 'Subjects', href: '/subjects', icon: BookOpenIcon },
-  { name: 'Curriculum', href: '/curriculum', icon: AcademicCapIcon },
-  { name: 'Deployments', href: '/deployments', icon: AcademicCapIcon },
-  { name: 'Attendance', href: '/attendance', icon: CalendarDaysIcon },
-  { name: 'Leave Requests', href: '/leave-requests', icon: DocumentTextIcon },
-  { name: 'Student Profiling', href: '/student-profiling', icon: UserCircleIcon },
+// Navigation grouped by category
+const navigationGroups = [
+  {
+    label: 'Overview',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+    ],
+  },
+  {
+    label: 'People',
+    items: [
+      { name: 'Employees', href: '/employees', icon: UserGroupIcon },
+      { name: 'Students', href: '/students', icon: AcademicCapIcon },
+      { name: 'Student Profiling', href: '/student-profiling', icon: UserCircleIcon },
+    ],
+  },
+  {
+    label: 'Academics',
+    items: [
+      { name: 'Subjects', href: '/subjects', icon: BookOpenIcon },
+      { name: 'Curriculum', href: '/curriculum', icon: BuildingOfficeIcon },
+      { name: 'Deployments', href: '/deployments', icon: RocketLaunchIcon },
+    ],
+  },
+  {
+    label: 'HR',
+    items: [
+      { name: 'Attendance', href: '/attendance', icon: CalendarDaysIcon },
+      { name: 'Leave Requests', href: '/leave-requests', icon: DocumentTextIcon },
+    ],
+  },
 ];
 
 interface LayoutProps {
@@ -31,30 +58,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [sidebarHovered, setSidebarHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Check screen size and update mobile state
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       if (mobile) {
-        setSidebarCollapsed(true);
-        setSidebarHovered(false);
-        setMobileMenuOpen(false);
-      } else {
+        setSidebarCollapsed(false);
         setMobileMenuOpen(false);
       }
     };
-    
     checkMobile();
-    const handleResize = () => {
-      checkMobile();
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const handleLogout = () => {
@@ -62,476 +80,441 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login');
   };
 
-  // Check if user is authenticated
   const getUserInfo = () => {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
   };
 
   const userInfo = getUserInfo();
+  const isExpanded = isMobile ? mobileMenuOpen : !sidebarCollapsed;
+  const sidebarWidth = isExpanded ? 260 : 72;
+
+  const getRoleBadge = () => {
+    const role = userInfo?.role;
+    if (role === 'master') return 'Master Admin';
+    if (role === 'dean') return 'Dean';
+    if (role === 'deptchair') return 'Dept Chair';
+    if (role === 'faculty') return 'Faculty';
+    return 'Administrator';
+  };
 
   return (
-    <div style={{ 
+    <div style={{
       display: 'flex',
-      backgroundColor: '#f8f9fa',
-      fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+      minHeight: '100vh',
+      backgroundColor: '#f1f5f9',
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     }}>
-      {/* Mobile Menu Toggle */}
-      {isMobile && (
-        <>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            style={{
-              position: 'fixed',
-              top: '20px',
-              left: '20px',
-              width: '50px',
-              height: '50px',
-              background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              zIndex: 1000,
-              boxShadow: '0 4px 15px rgba(255,107,53,0.4)',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,53,0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,107,53,0.4)';
-            }}
-          >
-            {mobileMenuOpen ? '×' : '|||'}
-          </button>
-          
-          {/* Mobile Backdrop */}
-          {mobileMenuOpen && (
-            <div
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 998,
-                transition: 'opacity 0.3s ease'
-              }}
-            />
-          )}
-        </>
+
+      {/* ── Mobile overlay backdrop ── */}
+      {isMobile && mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          style={{
+            position: 'fixed', inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+            zIndex: 998,
+            backdropFilter: 'blur(2px)',
+          }}
+        />
       )}
 
-      {/* Sidebar */}
-      <div 
+      {/* ── Mobile hamburger button ── */}
+      {isMobile && (
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          style={{
+            position: 'fixed',
+            top: '16px',
+            left: '16px',
+            width: '44px',
+            height: '44px',
+            background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1001,
+            boxShadow: '0 4px 14px rgba(255,107,53,0.45)',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+        >
+          {mobileMenuOpen
+            ? <XMarkIcon style={{ width: '22px', height: '22px' }} />
+            : <Bars3Icon style={{ width: '22px', height: '22px' }} />}
+        </button>
+      )}
+
+      {/* ══════════════════════════════════════
+          SIDEBAR
+      ══════════════════════════════════════ */}
+      <aside
         style={{
-          width: isMobile ? (mobileMenuOpen ? '280px' : '0') : ((sidebarCollapsed && !sidebarHovered) ? '80px' : '280px'),
-          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%)',
+          width: `${sidebarWidth}px`,
+          minWidth: `${sidebarWidth}px`,
+          background: 'linear-gradient(180deg, #1a1a1a 0%, #111111 100%)',
           color: 'white',
           height: '100vh',
           position: 'fixed',
+          top: 0,
+          left: 0,
           zIndex: 999,
-          boxShadow: isMobile && mobileMenuOpen ? '4px 0 30px rgba(0,0,0,0.5)' : '4px 0 20px rgba(0,0,0,0.3)',
-          borderRight: '1px solid rgba(255,255,255,0.1)',
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '4px 0 24px rgba(0,0,0,0.35)',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+          transition: 'width 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)',
           transform: isMobile ? (mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
           overflow: 'hidden',
-          left: 0,
-          top: 0,
-          display: 'flex',
-          flexDirection: 'column'
         }}
-        onMouseEnter={() => !isMobile && setSidebarHovered(true)}
-        onMouseLeave={() => !isMobile && setSidebarHovered(false)}
       >
-        {/* Logo Section */}
-        <div style={{ 
-          padding: (isMobile ? '15px 15px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '15px 15px' : '20px 20px'),
-          textAlign: 'center',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-          background: 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        {/* ── Logo / Brand ── */}
+        <div style={{
+          padding: isExpanded ? '20px 20px 16px' : '20px 12px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          flexShrink: 0,
+          background: 'linear-gradient(135deg, rgba(255,107,53,0.12) 0%, rgba(255,107,53,0.04) 100%)',
           position: 'relative',
           overflow: 'hidden',
-          flexShrink: 0
         }}>
+          {/* decorative corner */}
           <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: '60px',
-            height: '60px',
-            background: 'linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.1) 100%)',
-            borderRadius: '0 0 0 60px'
-          }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <img 
-              src="/1.jpg" 
-              alt="CCS Logo" 
-              style={{
-                width: (isMobile ? '35px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '30px' : '45px'),
-                height: (isMobile ? '35px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '30px' : '45px'),
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: (isMobile ? '2px solid #ff6b35' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '2px solid #ff6b35' : '3px solid #ff6b35'),
-                marginBottom: '8px',
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 4px 15px rgba(255,107,53,0.3)'
-              }}
-            />
-            {!(sidebarCollapsed && !sidebarHovered && !isMobile) && (
-              <div style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#ff6b35',
-                marginTop: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '1px'
-              }}>
+            position: 'absolute', top: 0, right: 0,
+            width: '50px', height: '50px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.25) 0%, transparent 100%)',
+            borderRadius: '0 0 0 50px',
+          }} />
+          <img
+            src="/1.jpg"
+            alt="CCS Logo"
+            style={{
+              width: isExpanded ? '42px' : '36px',
+              height: isExpanded ? '42px' : '36px',
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '2.5px solid #ff6b35',
+              boxShadow: '0 0 0 4px rgba(255,107,53,0.18)',
+              flexShrink: 0,
+              transition: 'all 0.35s ease',
+            }}
+          />
+          {isExpanded && (
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
                 CCS Portal
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Burger Button - Desktop Only */}
-        {!isMobile && (
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            style={{
-              position: 'absolute',
-              top: '25px',
-              right: '-18px',
-              width: '36px',
-              height: '36px',
-              background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              zIndex: 10,
-              boxShadow: '0 4px 15px rgba(255,107,53,0.4)',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,53,0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,107,53,0.4)';
-            }}
-          >
-            {sidebarCollapsed ? '☰' : '✕'}
-          </button>
-        )}
-
-        {/* Profile Section */}
-        <div style={{ 
-          padding: (isMobile ? '15px 15px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '20px 15px' : '25px 20px'),
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-          textAlign: 'center',
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          background: 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(99,102,241,0.02) 100%)',
-          position: 'relative',
-          overflow: 'hidden',
-          flexShrink: 0
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            left: '0',
-            width: '80px',
-            height: '80px',
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(99,102,241,0.05) 100%)',
-            borderRadius: '0 0 80px 0'
-          }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{
-              width: (isMobile ? '40px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '35px' : '60px'),
-              height: (isMobile ? '40px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '35px' : '60px'),
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 15px',
-              fontSize: (isMobile ? '16px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '14px' : '24px'),
-              fontWeight: 'bold',
-              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: '0 8px 25px rgba(99,102,241,0.3)',
-              border: '3px solid rgba(255,255,255,0.2)'
-            }}>
-              {(sidebarCollapsed && !sidebarHovered && !isMobile) ? userInfo?.name?.[0] || 'A' : userInfo?.name?.substring(0, 2) || 'AD'}
+              <div style={{ fontSize: '11px', color: '#ff6b35', fontWeight: '500', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
+                College of Computing Studies
+              </div>
             </div>
-            {!(sidebarCollapsed && !sidebarHovered && !isMobile) && (
-              <>
-                <h3 style={{ 
-                  margin: '0 0 8px', 
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  color: '#f1f5f9',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                }}>
-                  {userInfo?.name || 'Admin User'}
-                </h3>
-                <p style={{ 
-                  margin: 0, 
-                  fontSize: '14px',
-                  color: '#94a3b8',
-                  marginBottom: '12px',
-                  fontStyle: 'italic'
-                }}>
-                  {userInfo?.email || 'admin@pnc.edu.ph'}
-                </p>
-                <div style={{
-                  background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-                  color: 'white',
-                  padding: '6px 16px',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 4px 15px rgba(255,107,53,0.3)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  <div style={{
-                    width: '6px',
-                    height: '6px',
-                    background: 'rgba(255,255,255,0.8)',
-                    borderRadius: '50%',
-                    animation: 'pulse 2s infinite'
-                  }}></div>
-                  {userInfo?.role === 'master' ? 'Master Admin' : 'Administrator'}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+          )}
 
-        {/* Scrollable Content Area */}
-        <div style={{ 
-          flex: 1, 
-          overflowY: 'auto', 
-          overflowX: 'hidden',
-          position: 'relative',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-        }}>
-          {/* Navigation Menu */}
-          <div style={{ padding: '15px 0', position: 'relative' }}>
-            <div style={{
-              position: 'absolute',
-              top: '0',
-              right: '0',
-              width: '100px',
-              height: '100px',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)',
-              borderRadius: '0 0 0 100px',
-              pointerEvents: 'none'
-            }}></div>
-          {navigation.map((item, index) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={() => isMobile && setMobileMenuOpen(false)}
-                style={{
-                  padding: (isMobile ? '12px 20px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '15px 15px' : '15px 25px'),
-                  margin: (isMobile ? '0 10px 6px 10px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '0 5px 6px 5px' : '0 10px 8px 10px'),
-                  background: isActive 
-                    ? 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)' 
-                    : 'transparent',
-                  borderLeft: isActive && !(sidebarCollapsed && !sidebarHovered && !isMobile) ? '4px solid #ff6b35' : 'none',
-                  borderRadius: (sidebarCollapsed && !sidebarHovered && !isMobile) ? '12px' : '0 12px 12px 0',
-                  cursor: 'pointer',
-                  textAlign: (sidebarCollapsed && !sidebarHovered && !isMobile) ? 'center' : 'left',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: (isMobile ? '15px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '0' : '15px'),
-                  justifyContent: (isMobile ? 'flex-start' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? 'center' : 'flex-start'),
-                  textDecoration: 'none',
-                  color: isActive ? '#ffffff' : '#cbd5e1',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxShadow: isActive ? '0 4px 15px rgba(255,107,53,0.3)' : 'none',
-                  transform: isActive ? 'translateX(5px)' : 'translateX(0)',
-                  animation: `slideIn 0.3s ease ${index * 0.05}s both`
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive && !isMobile) {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)';
-                    e.currentTarget.style.color = '#ffffff';
-                    e.currentTarget.style.transform = 'translateX(8px)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,107,53,0.2)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive && !isMobile) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#cbd5e1';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: (isMobile ? '24px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '24px' : '28px'),
-                  height: (isMobile ? '24px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '24px' : '28px'),
-                  background: isActive 
-                    ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)'
-                    : 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,107,53,0.05) 100%)',
-                  borderRadius: '8px',
-                  transition: 'all 0.3s ease'
-                }}>
-                  <item.icon style={{ 
-                    width: (isMobile ? '18px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '16px' : '18px'), 
-                    height: (isMobile ? '18px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '16px' : '18px'),
-                    color: isActive ? '#ffffff' : '#ff6b35'
-                  }} />
-                </div>
-                {!(sidebarCollapsed && !sidebarHovered && !isMobile) && (
-                  <div style={{
-                    fontSize: (isMobile ? '14px' : '15px'),
-                    fontWeight: isActive ? '600' : '500',
-                    letterSpacing: '0.3px'
-                  }}>
-                    {item.name}
-                  </div>
-                )}
-                {isActive && !(sidebarCollapsed && !sidebarHovered && !isMobile) && (
-                  <div style={{
-                    position: 'absolute',
-                    right: '20px',
-                    width: '6px',
-                    height: '6px',
-                    background: '#ffffff',
-                    borderRadius: '50%',
-                    animation: 'pulse 2s infinite'
-                  }}></div>
-                )}
-              </Link>
-            );
-          })}
-          </div>
-        </div>
-
-        {/* Logout Button */}
-          <div style={{ 
-            padding: (isMobile ? '15px 15px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '20px 15px' : '25px 20px'),
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            background: 'linear-gradient(135deg, rgba(239,68,68,0.05) 0%, rgba(239,68,68,0.02) 100%)',
-            position: 'relative',
-            overflow: 'hidden',
-            flexShrink: 0
-          }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: '80px',
-            height: '80px',
-            background: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.05) 100%)',
-            borderRadius: '0 0 0 80px'
-          }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
+          {/* Desktop collapse toggle */}
+          {!isMobile && (
             <button
-              onClick={handleLogout}
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               style={{
-                width: '100%',
-                padding: (isMobile ? '14px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '14px' : '16px'),
-                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: (isMobile ? '14px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '13px' : '15px'),
-                fontWeight: '600',
+                marginLeft: 'auto',
+                width: '26px',
+                height: '26px',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: '6px',
+                color: '#94a3b8',
                 cursor: 'pointer',
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: (isMobile ? 'flex-start' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? 'center' : 'flex-start'),
-                gap: (isMobile ? '12px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '0' : '12px'),
-                boxShadow: '0 4px 15px rgba(239,68,68,0.3)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 25px rgba(239,68,68,0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(239,68,68,0.3)';
-              }}
-            >
-              <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: (isMobile ? '20px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '20px' : '24px'),
-                height: (isMobile ? '20px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '20px' : '24px'),
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
-                borderRadius: '6px',
-                transition: 'all 0.3s ease'
+                flexShrink: 0,
+                transition: 'background 0.2s ease, color 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,107,53,0.2)';
+                e.currentTarget.style.color = '#ff6b35';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.color = '#94a3b8';
+              }}
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {sidebarCollapsed
+                ? <ChevronRightIcon style={{ width: '14px', height: '14px' }} />
+                : <ChevronLeftIcon style={{ width: '14px', height: '14px' }} />}
+            </button>
+          )}
+        </div>
+
+        {/* ── User Profile ── */}
+        <div style={{
+          padding: isExpanded ? '16px 20px' : '16px 12px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          flexShrink: 0,
+          background: 'rgba(99,102,241,0.05)',
+        }}>
+          <div style={{
+            width: isExpanded ? '40px' : '36px',
+            height: isExpanded ? '40px' : '36px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: isExpanded ? '15px' : '13px',
+            fontWeight: '700',
+            color: 'white',
+            flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(99,102,241,0.35)',
+            border: '2px solid rgba(255,255,255,0.15)',
+            transition: 'all 0.35s ease',
+          }}>
+            {userInfo?.name?.substring(0, 2)?.toUpperCase() || 'AD'}
+          </div>
+          {isExpanded && (
+            <div style={{ overflow: 'hidden', flex: 1 }}>
+              <div style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#f1f5f9',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}>
-                <ArrowRightOnRectangleIcon style={{ 
-                  width: (isMobile ? '16px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '14px' : '16px'), 
-                  height: (isMobile ? '16px' : (sidebarCollapsed && !sidebarHovered && !isMobile) ? '14px' : '16px')
-                }} />
+                {userInfo?.name || 'Admin User'}
               </div>
-              {!(sidebarCollapsed && !sidebarHovered && !isMobile) && (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                marginTop: '4px',
+                background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+                color: 'white',
+                padding: '2px 8px',
+                borderRadius: '20px',
+                fontSize: '10px',
+                fontWeight: '600',
+                letterSpacing: '0.4px',
+                textTransform: 'uppercase',
+              }}>
                 <div style={{
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  letterSpacing: '0.3px'
+                  width: '5px', height: '5px',
+                  background: 'rgba(255,255,255,0.8)',
+                  borderRadius: '50%',
+                  animation: 'pulse 2s infinite',
+                }} />
+                {getRoleBadge()}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Navigation ── */}
+        <nav style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          padding: '12px 0',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(255,255,255,0.15) transparent',
+        }}>
+          {navigationGroups.map((group) => (
+            <div key={group.label} style={{ marginBottom: '4px' }}>
+              {/* Group label */}
+              {isExpanded && (
+                <div style={{
+                  padding: '8px 20px 4px',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  color: 'rgba(255,255,255,0.3)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
                 }}>
-                  Logout
+                  {group.label}
                 </div>
               )}
-            </button>
-          </div>
-        </div>
-      </div>
+              {!isExpanded && (
+                <div style={{
+                  height: '1px',
+                  background: 'rgba(255,255,255,0.06)',
+                  margin: '8px 12px 4px',
+                }} />
+              )}
 
-      {/* Main Content */}
-      <div style={{
+              {group.items.map((item, idx) => {
+                const isActive = location.pathname === item.href ||
+                  (item.href === '/dashboard' && location.pathname === '/');
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => isMobile && setMobileMenuOpen(false)}
+                    title={!isExpanded ? item.name : undefined}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: isExpanded ? '10px 20px' : '10px 18px',
+                      margin: '2px 8px',
+                      borderRadius: '10px',
+                      textDecoration: 'none',
+                      color: isActive ? '#ffffff' : '#94a3b8',
+                      background: isActive
+                        ? 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)'
+                        : 'transparent',
+                      boxShadow: isActive ? '0 4px 14px rgba(255,107,53,0.35)' : 'none',
+                      fontWeight: isActive ? '600' : '500',
+                      fontSize: '14px',
+                      transition: 'all 0.25s ease',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      animation: `slideIn 0.3s ease ${idx * 0.04}s both`,
+                      justifyContent: isExpanded ? 'flex-start' : 'center',
+                    }}
+                    onMouseEnter={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'rgba(255,107,53,0.12)';
+                        e.currentTarget.style.color = '#ffffff';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#94a3b8';
+                      }
+                    }}
+                  >
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      background: isActive
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(255,255,255,0.06)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      transition: 'background 0.25s ease',
+                    }}>
+                      <item.icon style={{
+                        width: '17px',
+                        height: '17px',
+                        color: isActive ? '#ffffff' : '#ff6b35',
+                      }} />
+                    </div>
+                    {isExpanded && (
+                      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {item.name}
+                      </span>
+                    )}
+                    {isActive && isExpanded && (
+                      <div style={{
+                        width: '6px', height: '6px',
+                        background: 'rgba(255,255,255,0.8)',
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        animation: 'pulse 2s infinite',
+                      }} />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        {/* ── Logout ── */}
+        <div style={{
+          padding: isExpanded ? '16px 16px' : '16px 10px',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          flexShrink: 0,
+          background: 'rgba(239,68,68,0.04)',
+        }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              padding: isExpanded ? '11px 16px' : '11px',
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: isExpanded ? 'flex-start' : 'center',
+              gap: '10px',
+              boxShadow: '0 4px 14px rgba(239,68,68,0.3)',
+              transition: 'all 0.25s ease',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(239,68,68,0.4)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 14px rgba(239,68,68,0.3)';
+            }}
+          >
+            <div style={{
+              width: '28px', height: '28px',
+              background: 'rgba(255,255,255,0.18)',
+              borderRadius: '7px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <ArrowRightOnRectangleIcon style={{ width: '16px', height: '16px' }} />
+            </div>
+            {isExpanded && <span>Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* ══════════════════════════════════════
+          MAIN CONTENT
+      ══════════════════════════════════════ */}
+      <main style={{
         flex: 1,
-        marginLeft: isMobile ? '0' : ((sidebarCollapsed && !sidebarHovered) ? '80px' : '280px'),
-        padding: isMobile ? '20px 15px' : '40px',
-        backgroundColor: '#f8f9fa',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
         minHeight: '100vh',
-        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        paddingTop: isMobile ? '80px' : '40px'
+        backgroundColor: '#f1f5f9',
+        transition: 'margin-left 0.35s cubic-bezier(0.4,0,0.2,1)',
+        paddingTop: isMobile ? '72px' : '0',
+        overflowX: 'hidden',
       }}>
         {children}
-      </div>
+      </main>
+
+      <style>{`
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(-10px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.4; }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

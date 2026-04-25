@@ -2,61 +2,29 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { studentProfileService, studentService } from '../services/api';
 import { useToast } from '../components/ToastProvider';
 
-interface StudentOption {
-  id: number;
-  full_name: string;
-  student_id: string;
-}
+interface StudentOption { id: number; full_name: string; student_id: string; }
 
 interface StudentProfile {
   id: number;
   student_id: string;
-  student: {
-    id: number;
-    full_name: string;
-    student_id: string;
-    email: string;
-    program: string;
-    year_level: number;
-  };
-  academic_profile: {
-    academic_history: string;
-    gpa: number;
-    career_aspiration: string;
-  };
-  activities: {
-    non_academic_activities: string;
-    violations: string;
-    skills: string[];
-    affiliations: string[];
-  };
+  student: { id: number; full_name: string; student_id: string; email: string; program: string; year_level: number; };
+  academic_profile: { academic_history: string; gpa: number; career_aspiration: string; };
+  activities: { non_academic_activities: string; violations: string; skills: string[]; affiliations: string[]; };
 }
 
-interface Filters {
-  search: string;
-}
+interface Filters { search: string; }
 
 interface FormState {
-  student_id: string;
-  academic_history: string;
-  non_academic_activities: string;
-  violations: string;
-  skills: string;
-  affiliations: string;
-  gpa: string;
-  career_aspiration: string;
+  student_id: string; academic_history: string; non_academic_activities: string;
+  violations: string; skills: string; affiliations: string; gpa: string; career_aspiration: string;
 }
 
 const initialForm: FormState = {
-  student_id: '',
-  academic_history: '',
-  non_academic_activities: '',
-  violations: '',
-  skills: '',
-  affiliations: '',
-  gpa: '',
-  career_aspiration: '',
+  student_id: '', academic_history: '', non_academic_activities: '',
+  violations: '', skills: '', affiliations: '', gpa: '', career_aspiration: '',
 };
+
+const ITEMS_PER_PAGE = 8;
 
 const StudentProfilingDashboard: React.FC = () => {
   const [profiles, setProfiles] = useState<StudentProfile[]>([]);
@@ -67,12 +35,11 @@ const StudentProfilingDashboard: React.FC = () => {
   const [selectedProfile, setSelectedProfile] = useState<StudentProfile | null>(null);
   const [editingProfile, setEditingProfile] = useState<StudentProfile | null>(null);
   const [form, setForm] = useState<FormState>(initialForm);
+  const [searchTimeout, setSearchTimeout] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const toast = useToast();
 
-  useEffect(() => {
-    void loadStudents();
-    void loadProfiles();
-  }, []);
+  useEffect(() => { void loadStudents(); void loadProfiles(); }, []);
 
   const loadStudents = async () => {
     const data = await studentService.getAll();
@@ -92,41 +59,23 @@ const StudentProfilingDashboard: React.FC = () => {
     }
   };
 
-  // Real-time search with debounce
-  const [searchTimeout, setSearchTimeout] = useState<number | null>(null);
-  
   const handleSearchChange = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
-    
-    // Clear existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
-    // Set new timeout for search
-    const timeout = setTimeout(() => {
-      void loadProfiles({ search: value });
-    }, 300); // 300ms debounce
-    
+    setCurrentPage(1);
+    if (searchTimeout) clearTimeout(searchTimeout);
+    const timeout = setTimeout(() => { void loadProfiles({ search: value }); }, 300);
     setSearchTimeout(timeout);
   };
 
   const studentOptions = useMemo(
-    () => students.map((s) => ({ value: String(s.id), label: `${s.full_name} (${s.student_id})` })),
+    () => students.map((s) => ({ value: String(s.id), label: s.full_name + ' (' + s.student_id + ')' })),
     [students],
   );
 
   const parseList = (value: string) =>
-    value
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean);
+    value.split(',').map((item) => item.trim()).filter(Boolean);
 
-  const openCreate = () => {
-    setEditingProfile(null);
-    setForm(initialForm);
-    setShowForm(true);
-  };
+  const openCreate = () => { setEditingProfile(null); setForm(initialForm); setShowForm(true); };
 
   const openEdit = (profile: StudentProfile) => {
     setEditingProfile(profile);
@@ -145,11 +94,7 @@ const StudentProfilingDashboard: React.FC = () => {
 
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.student_id) {
-      toast.error('Please select a student');
-      return;
-    }
-
+    if (!form.student_id) { toast.error('Please select a student'); return; }
     const payload = {
       student_id: Number(form.student_id),
       academic_history: form.academic_history,
@@ -159,12 +104,9 @@ const StudentProfilingDashboard: React.FC = () => {
       affiliations: parseList(form.affiliations),
       gpa: form.gpa ? Number(form.gpa) : null,
       career_aspiration: form.career_aspiration,
-      needs_intervention: false, // Required boolean field
+      needs_intervention: false,
     };
-
     console.log('Submitting payload:', payload);
-    console.log('Form data:', form);
-
     try {
       if (editingProfile) {
         await studentProfileService.update(editingProfile.id, payload);
@@ -178,19 +120,16 @@ const StudentProfilingDashboard: React.FC = () => {
       await loadProfiles();
     } catch (error) {
       console.error('Save failed', error);
-      // Log detailed error response for debugging
       if (error instanceof Error && 'response' in error) {
         const axiosError = error as any;
         console.error('Error response:', axiosError.response?.data);
-        console.error('Error status:', axiosError.response?.status);
-        console.error('Validation errors:', axiosError.response?.data?.errors);
       }
       toast.error('Failed to save profile');
     }
   };
 
   const deleteProfile = async (profile: StudentProfile) => {
-    if (!window.confirm(`Delete profile for ${profile.student.full_name}?`)) return;
+    if (!window.confirm('Delete profile for ' + profile.student.full_name + '?')) return;
     try {
       await studentProfileService.delete(profile.id);
       toast.success('Profile deleted');
@@ -201,1197 +140,362 @@ const StudentProfilingDashboard: React.FC = () => {
     }
   };
 
+  const exportToExcel = () => {
+    const headers = ['Student Name','Student ID','Email','Program','Year Level','GPA','Academic History','Activities','Skills','Affiliations','Career Aspiration','Violations'];
+    const rows = profiles.map(pr => [
+      pr.student.full_name,
+      pr.student.student_id,
+      pr.student.email,
+      pr.student.program,
+      pr.student.year_level,
+      pr.academic_profile.gpa ?? '',
+      (pr.academic_profile.academic_history ?? '').replace(/,/g, ';'),
+      (pr.activities.non_academic_activities ?? '').replace(/,/g, ';'),
+      (pr.activities.skills || []).join(' | '),
+      (pr.activities.affiliations || []).join(' | '),
+      (pr.academic_profile.career_aspiration ?? '').replace(/,/g, ';'),
+      (pr.activities.violations ?? '').replace(/,/g, ';'),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'student_profiles.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const totalPages = Math.max(1, Math.ceil(profiles.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedProfiles = profiles.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+  const needsAttentionCount = profiles.filter(pr => pr.activities.violations && pr.activities.violations.trim() !== '').length;
+  const withGpaCount = profiles.filter(pr => pr.academic_profile.gpa).length;
+
+  const focusOrange = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    e.currentTarget.style.borderColor = '#ff6b35';
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,107,53,0.1)';
+  };
+  const blurField = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    e.currentTarget.style.borderColor = '#e5e7eb';
+    e.currentTarget.style.boxShadow = 'none';
+  };
+
   return (
-    <div style={{
-      padding: 'clamp(12px, 3vw, 24px)',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      minHeight: '100vh'
-    }}>
-      <div style={{ marginBottom: 'clamp(20px, 4vw, 32px)' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'clamp(12px, 2vw, 16px)',
-          marginBottom: 'clamp(12px, 2vw, 16px)',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{
-            width: 'clamp(10px, 2vw, 12px)',
-            height: 'clamp(10px, 2vw, 12px)',
-            background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-            borderRadius: '50%'
-          }}></div>
-          <h1 style={{ fontSize: 'clamp(20px, 4vw, 32px)', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>
-            Student Profile Module
-          </h1>
-        </div>
-        <p style={{ color: '#64748b', marginTop: 'clamp(6px, 1.5vw, 8px)', fontSize: 'clamp(14px, 2.5vw, 16px)', lineHeight: '1.5' }}>
-          Manage comprehensive student data, view profiles, and run filters for skills/activities. 
-          <strong>Tip:</strong> Use comma-separated values in filters to search for multiple items (e.g., "Programming, JavaScript, Python").
-        </p>
-      </div>
+    <div style={{ padding: 'clamp(20px,3vw,32px)', background: '#f1f5f9', minHeight: '100vh', fontFamily: 'Segoe UI, sans-serif' }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-      <div style={{ 
-        marginBottom: 'clamp(16px, 3vw, 24px)', 
-        padding: 'clamp(16px, 3vw, 20px)', 
-        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', 
-        border: '1px solid #bae6fd', 
-        borderRadius: 'clamp(10px, 2vw, 12px)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: '0',
-          right: '0',
-          width: '80px',
-          height: '80px',
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%)',
-          borderRadius: '0 12px 0 80px'
-        }}></div>
-        <div style={{ fontSize: 'clamp(14px, 2.5vw, 16px)', color: '#0369a1', fontWeight: '600', marginBottom: 'clamp(6px, 1.5vw, 8px)', display: 'flex', alignItems: 'center', gap: 'clamp(6px, 1.5vw, 8px)' }}>
-          <div style={{
-            width: 'clamp(6px, 1.5vw, 8px)',
-            height: 'clamp(6px, 1.5vw, 8px)',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-            borderRadius: '50%'
-          }}></div>
-          Quick Filter Examples
+      {/* Header card */}
+      <div style={{ background: 'linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%)', borderRadius: '16px', padding: '24px 28px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ color: '#fff', fontWeight: '700', fontSize: '24px', margin: '0 0 4px 0', fontFamily: 'Segoe UI, sans-serif' }}>Student Profiling</h1>
+          <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0, fontFamily: 'Segoe UI, sans-serif' }}>Manage comprehensive student data and profiles</p>
         </div>
-        <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#0c4a6e', display: 'flex', flexDirection: 'column', gap: 'clamp(6px, 1.5vw, 8px)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: '600', color: '#1e40af' }}>Try searching:</span>
-            <span>"Programming", "JavaScript", "Python", "React", "Data Analysis"</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: '600', color: '#1e40af' }}>Activities:</span>
-            <span>"basketball", "volunteer", "mentor", "research"</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: '600', color: '#1e40af' }}>Affiliations:</span>
-            <span>"Student Council", "Tech Club", "Computer Science Society"</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: '600', color: '#1e40af' }}>Student Info:</span>
-            <span>Student names and IDs</span>
-          </div>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button onClick={exportToExcel}
+            style={{ background: 'linear-gradient(135deg,#10b981 0%,#059669 100%)', color: '#fff', padding: '11px 18px', borderRadius: '10px', border: 'none', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'Segoe UI, sans-serif', boxShadow: '0 4px 14px rgba(16,185,129,0.35)', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(16,185,129,0.45)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(16,185,129,0.35)'; }}
+          >📥 Export Excel</button>
+          <button onClick={openCreate}
+            style={{ background: 'linear-gradient(135deg,#ff6b35 0%,#e55a2b 100%)', color: '#fff', padding: '11px 18px', borderRadius: '10px', border: 'none', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'Segoe UI, sans-serif', boxShadow: '0 4px 14px rgba(255,107,53,0.35)', transition: 'all 0.2s', whiteSpace: 'nowrap' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,53,0.45)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(255,107,53,0.35)'; }}
+          >+ Add Profile</button>
         </div>
       </div>
 
-      <div style={{ 
-        marginBottom: 'clamp(20px, 4vw, 32px)',
-        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-        borderRadius: 'clamp(12px, 2.5vw, 16px)',
-        padding: 'clamp(20px, 4vw, 28px)',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-        border: '1px solid rgba(0,0,0,0.05)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: '0',
-          right: '0',
-          width: '100px',
-          height: '100px',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%)',
-          borderRadius: '0 16px 0 100px'
-        }}></div>
-        
-        <h3 style={{ 
-          fontSize: 'clamp(16px, 3vw, 18px)', 
-          fontWeight: '600', 
-          color: '#1e293b', 
-          marginBottom: 'clamp(16px, 3vw, 20px)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'clamp(8px, 2vw, 10px)',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{
-            width: 'clamp(6px, 1.5vw, 8px)',
-            height: 'clamp(6px, 1.5vw, 8px)',
-            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-            borderRadius: '50%'
-          }}></div>
-          Filter Student Profiles
-        </h3>
-        
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <label style={{ display: 'block', fontSize: 'clamp(13px, 2.5vw, 15px)', fontWeight: '600', color: '#374151', marginBottom: 'clamp(10px, 2vw, 12px)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(6px, 1.5vw, 8px)' }}>
-              <div style={{
-                width: 'clamp(6px, 1.5vw, 8px)',
-                height: 'clamp(6px, 1.5vw, 8px)',
-                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                borderRadius: '50%'
-              }}></div>
-              Search Student Profiles
-            </div>
-          </label>
-          <div style={{ position: 'relative' }}>
-            <div style={{
-              position: 'absolute',
-              left: 'clamp(12px, 3vw, 16px)',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              fontSize: 'clamp(16px, 3vw, 18px)',
-              color: '#6366f1',
-              pointerEvents: 'none'
-            }}>
-              🔍
-            </div>
-            <input 
-              placeholder="Search by name, student ID, skills, activities, or affiliations..." 
-              value={filters.search} 
-              onChange={(e) => handleSearchChange(e.target.value)}
-              style={{
-                width: '100%',
-                padding: 'clamp(12px, 3vw, 16px) clamp(12px, 3vw, 16px) clamp(12px, 3vw, 16px) clamp(40px, 8vw, 50px)',
-                border: '2px solid #e5e7eb',
-                borderRadius: 'clamp(10px, 2vw, 12px)',
-                fontSize: 'clamp(14px, 2.5vw, 16px)',
-                transition: 'all 0.3s ease',
-                background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = '#6366f1';
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 15px rgba(99, 102, 241, 0.15)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#e5e7eb';
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
-              }}
-            />
-          </div>
-          {filters.search && (
-            <div style={{
-              marginTop: '12px',
-              padding: '8px 16px',
-              background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-              borderRadius: '8px',
-              border: '1px solid #bae6fd',
-              fontSize: '13px',
-              color: '#0369a1',
-              textAlign: 'center'
-            }}>
-              <span>Searching for: </span>
-              <strong>"{filters.search}"</strong>
-              {profiles.length > 0 && (
-                <span style={{ marginLeft: '8px', color: '#059669' }}>
-                  ({profiles.length} result{profiles.length !== 1 ? 's' : ''} found)
-                </span>
-              )}
-            </div>
+      {/* Stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '16px', marginBottom: '20px' }}>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1, background: 'linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{profiles.length}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '500' }}>Total Profiles</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1, background: 'linear-gradient(135deg,#f59e0b 0%,#d97706 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{withGpaCount}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '500' }}>With GPA</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1, background: 'linear-gradient(135deg,#ef4444 0%,#dc2626 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{needsAttentionCount}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '500' }}>Needs Attention</div>
+        </div>
+      </div>
+
+      {/* Search bar */}
+      <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+        <div style={{ position: 'relative' }}>
+          <svg style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', pointerEvents: 'none' }} fill="none" stroke="#ff6b35" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input
+            type="text"
+            placeholder="Search by name, student ID, skills, activities, or affiliations..."
+            value={filters.search}
+            onChange={e => handleSearchChange(e.target.value)}
+            style={{ width: '100%', padding: '11px 16px 11px 44px', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s', color: '#1a1a1a' }}
+            onFocus={e => { e.currentTarget.style.borderColor = '#ff6b35'; }}
+            onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+          />
+        </div>
+        <div style={{ marginTop: '8px', fontSize: '12px', color: '#94a3b8', fontFamily: 'Segoe UI, sans-serif' }}>
+          💡 Tip: Search for skills like "JavaScript", activities like "basketball", or affiliations like "Student Council"
+          {filters.search && profiles.length > 0 && (
+            <span style={{ marginLeft: '12px', color: '#059669', fontWeight: '600' }}>({profiles.length} result{profiles.length !== 1 ? 's' : ''} found)</span>
           )}
-          <div style={{
-            marginTop: '12px',
-            fontSize: '13px',
-            color: '#64748b',
-            textAlign: 'center',
-            fontStyle: 'italic'
-          }}>
-            💡 Tip: Search for anything - skills like "JavaScript", activities like "basketball", or affiliations like "Student Council"
-          </div>
         </div>
       </div>
 
-      <div style={{ 
-        display: 'flex', 
-        gap: 'clamp(12px, 2vw, 16px)', 
-        marginBottom: 'clamp(20px, 4vw, 32px)', 
-        flexWrap: 'wrap',
-        justifyContent: 'center'
-      }}>
-        <button 
-          onClick={() => loadProfiles()}
-          style={{
-            padding: 'clamp(12px, 2.5vw, 14px) clamp(20px, 4vw, 28px)',
-            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: 'clamp(10px, 2vw, 12px)',
-            fontSize: 'clamp(13px, 2.5vw, 15px)',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'clamp(6px, 1.5vw, 8px)',
-            flex: '1',
-            minWidth: '120px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 8px 25px rgba(99, 102, 241, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.3)';
-          }}
-        >
-          <span>🔍</span> Apply Filters
-        </button>
-        <button
-          onClick={() => {
-            const cleared = { search: '' };
-            setFilters(cleared);
-            void loadProfiles(cleared);
-          }}
-          style={{
-            padding: 'clamp(12px, 2.5vw, 14px) clamp(20px, 4vw, 28px)',
-            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-            color: '#475569',
-            border: '2px solid #e2e8f0',
-            borderRadius: 'clamp(10px, 2vw, 12px)',
-            fontSize: 'clamp(13px, 2.5vw, 15px)',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'clamp(6px, 1.5vw, 8px)',
-            flex: '1',
-            minWidth: '120px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
-            e.currentTarget.style.borderColor = '#cbd5e1';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
-            e.currentTarget.style.borderColor = '#e2e8f0';
-          }}
-        >
-          <span>🔄</span> Clear
-        </button>
-        <button 
-          onClick={openCreate}
-          style={{
-            padding: 'clamp(12px, 2.5vw, 14px) clamp(20px, 4vw, 28px)',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: 'clamp(10px, 2vw, 12px)',
-            fontSize: 'clamp(13px, 2.5vw, 15px)',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'clamp(6px, 1.5vw, 8px)',
-            flex: '1',
-            minWidth: '120px'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.3)';
-          }}
-        >
-          <span>➕</span> Add Student Profile
-        </button>
-      </div>
-
+      {/* Profile cards grid */}
       {loading ? (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '256px',
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: '16px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
-        }}>
-          <div style={{ 
-            border: '4px solid #6366f1',
-            borderTop: '4px solid transparent',
-            borderRadius: '50%',
-            width: '48px',
-            height: '48px',
-            animation: 'spin 1s linear infinite'
-          }}></div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '256px', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+          <div style={{ border: '4px solid #ff6b35', borderTop: '4px solid transparent', borderRadius: '50%', width: '48px', height: '48px', animation: 'spin 1s linear infinite' }} />
+        </div>
+      ) : paginatedProfiles.length === 0 ? (
+        <div style={{ background: '#fff', borderRadius: '16px', padding: '60px 20px', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+          <div style={{ fontWeight: '700', fontSize: '18px', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif', marginBottom: '8px' }}>No profiles found</div>
+          <div style={{ fontSize: '14px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>Try adjusting your search or add a new profile</div>
         </div>
       ) : (
-        <div style={{ 
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', 
-          borderRadius: '16px', 
-          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-          border: '1px solid rgba(0,0,0,0.05)',
-          overflow: 'hidden',
-          position: 'relative'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: '150px',
-            height: '150px',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%)',
-            borderRadius: '0 16px 0 150px'
-          }}></div>
-          
-          <table style={{ width: '100%', borderCollapse: 'collapse', position: 'relative', zIndex: 1 }}>
-            <thead style={{ 
-              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', 
-              borderBottom: '2px solid #e2e8f0'
-            }}>
-              <tr>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
-                  fontSize: '13px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(340px,1fr))', gap: '20px', marginBottom: '20px' }}>
+          {paginatedProfiles.map(profile => (
+            <div key={profile.id} style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.06)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              {/* Card header */}
+              <div style={{ background: 'linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%)', padding: '16px 20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
+                  <div style={{ fontWeight: '700', fontSize: '16px', color: '#fff', fontFamily: 'Segoe UI, sans-serif' }}>{profile.student.full_name}</div>
+                  <span style={{ background: 'rgba(255,107,53,0.2)', color: '#ff6b35', border: '1px solid rgba(255,107,53,0.3)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif', whiteSpace: 'nowrap' }}>{profile.student.student_id}</span>
+                </div>
+                <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', fontFamily: 'Segoe UI, sans-serif' }}>{profile.student.program}</span>
+                  <span style={{ background: 'rgba(16,185,129,0.2)', color: '#6ee7b7', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', fontFamily: 'Segoe UI, sans-serif' }}>Year {profile.student.year_level}</span>
+                </div>
+              </div>
+              {/* Card body */}
+              <div style={{ padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* GPA */}
+                {profile.academic_profile.gpa && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                      borderRadius: '50%'
-                    }}></div>
-                    Student
+                    <span style={{ fontSize: '14px' }}>🏆</span>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>GPA:</span>
+                    <span style={{ background: 'linear-gradient(135deg,#f59e0b 0%,#d97706 100%)', color: '#fff', padding: '2px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif' }}>{profile.academic_profile.gpa}</span>
                   </div>
-                </th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
-                  fontSize: '13px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      borderRadius: '50%'
-                    }}></div>
-                    Academic History
+                )}
+                {/* Academic History */}
+                {profile.academic_profile.academic_history && (
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><span>📚</span> Academic History</div>
+                    <div style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{profile.academic_profile.academic_history}</div>
                   </div>
-                </th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
-                  fontSize: '13px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      borderRadius: '50%'
-                    }}></div>
-                    Activities
+                )}
+                {/* Career Aspiration */}
+                {profile.academic_profile.career_aspiration && (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                    <span style={{ fontSize: '14px', flexShrink: 0 }}>🎯</span>
+                    <div style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif' }}>{profile.academic_profile.career_aspiration}</div>
                   </div>
-                </th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
-                  fontSize: '13px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                      borderRadius: '50%'
-                    }}></div>
-                    Skills
+                )}
+                {/* Activities */}
+                {profile.activities.non_academic_activities && (
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><span>🎭</span> Activities</div>
+                    <div style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{profile.activities.non_academic_activities}</div>
                   </div>
-                </th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
-                  fontSize: '13px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                      borderRadius: '50%'
-                    }}></div>
-                    Affiliations
+                )}
+                {/* Skills */}
+                {(profile.activities.skills || []).length > 0 && (
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}><span>🔧</span> Skills</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      {(profile.activities.skills || []).slice(0, 5).map((skill, i) => (
+                        <span key={i} style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', fontFamily: 'Segoe UI, sans-serif' }}>{skill}</span>
+                      ))}
+                      {(profile.activities.skills || []).length > 5 && (
+                        <span style={{ background: '#f1f5f9', color: '#64748b', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontFamily: 'Segoe UI, sans-serif' }}>+{(profile.activities.skills || []).length - 5} more</span>
+                      )}
+                    </div>
                   </div>
-                </th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
-                  fontSize: '13px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-                      borderRadius: '50%'
-                    }}></div>
-                    Actions
+                )}
+                {/* Affiliations */}
+                {(profile.activities.affiliations || []).length > 0 && (
+                  <div>
+                    <div style={{ fontSize: '12px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}><span>🏛️</span> Affiliations</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      {(profile.activities.affiliations || []).slice(0, 4).map((aff, i) => (
+                        <span key={i} style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', fontFamily: 'Segoe UI, sans-serif' }}>{aff}</span>
+                      ))}
+                      {(profile.activities.affiliations || []).length > 4 && (
+                        <span style={{ background: '#f1f5f9', color: '#64748b', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontFamily: 'Segoe UI, sans-serif' }}>+{(profile.activities.affiliations || []).length - 4} more</span>
+                      )}
+                    </div>
                   </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody style={{ backgroundColor: 'white' }}>
-              {profiles.map((profile, index) => (
-                <tr 
-                  key={profile.id} 
-                  style={{ 
-                    borderBottom: '1px solid #f1f5f9',
-                    transition: 'all 0.3s ease',
-                    background: index % 2 === 0 ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)';
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = index % 2 === 0 ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <td style={{ padding: '20px' }}>
-                    <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
-                      {profile.student.full_name}
-                    </div>
-                    <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      {profile.student.student_id}
-                    </div>
-                  </td>
-                  <td style={{ padding: '20px' }}>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      color: '#374151', 
-                      maxWidth: '250px', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis', 
-                      whiteSpace: 'nowrap',
-                      padding: '8px 12px',
-                      background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(34, 197, 94, 0.2)'
-                    }} title={profile.academic_profile.academic_history || 'N/A'}>
-                      {profile.academic_profile.academic_history || 'N/A'}
-                    </div>
-                  </td>
-                  <td style={{ padding: '20px' }}>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      color: '#374151', 
-                      maxWidth: '250px', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis', 
-                      whiteSpace: 'nowrap',
-                      padding: '8px 12px',
-                      background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(245, 158, 11, 0.2)'
-                    }} title={profile.activities.non_academic_activities || 'N/A'}>
-                      {profile.activities.non_academic_activities || 'N/A'}
-                    </div>
-                  </td>
-                  <td style={{ padding: '20px' }}>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      color: '#374151', 
-                      maxWidth: '200px', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis', 
-                      whiteSpace: 'nowrap',
-                      padding: '8px 12px',
-                      background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(139, 92, 246, 0.2)'
-                    }} title={(profile.activities.skills || []).join(', ') || 'N/A'}>
-                      {(profile.activities.skills || []).join(', ') || 'N/A'}
-                    </div>
-                  </td>
-                  <td style={{ padding: '20px' }}>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      color: '#374151', 
-                      maxWidth: '200px', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis', 
-                      whiteSpace: 'nowrap',
-                      padding: '8px 12px',
-                      background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(239, 68, 68, 0.2)'
-                    }} title={(profile.activities.affiliations || []).join(', ') || 'N/A'}>
-                      {(profile.activities.affiliations || []).join(', ') || 'N/A'}
-                    </div>
-                  </td>
-                  <td style={{ padding: '20px' }}>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                      <button 
-                        onClick={() => setSelectedProfile(profile)}
-                        style={{
-                          padding: '10px 14px',
-                          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                          color: 'white',
-                          border: 'none',
-                          cursor: 'pointer',
-                          borderRadius: '8px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px',
-                          fontSize: '13px',
-                          fontWeight: '500',
-                          transition: 'all 0.3s ease',
-                          boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
-                        }}
-                        title="View Profile"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
-                        }}
-                      >
-                        <span>View</span>
-                      </button>
-                      <button 
-                        onClick={() => openEdit(profile)}
-                        style={{
-                          padding: '10px 14px',
-                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                          color: 'white',
-                          border: 'none',
-                          cursor: 'pointer',
-                          borderRadius: '8px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px',
-                          fontSize: '13px',
-                          fontWeight: '500',
-                          transition: 'all 0.3s ease',
-                          boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
-                        }}
-                        title="Edit Profile"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.3)';
-                        }}
-                      >
-                        <span>Edit</span>
-                      </button>
-                      <button 
-                        onClick={() => void deleteProfile(profile)}
-                        style={{
-                          padding: '10px 14px',
-                          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                          color: 'white',
-                          border: 'none',
-                          cursor: 'pointer',
-                          borderRadius: '8px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px',
-                          fontSize: '13px',
-                          fontWeight: '500',
-                          transition: 'all 0.3s ease',
-                          boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
-                        }}
-                        title="Delete Profile"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
-                        }}
-                      >
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                )}
+                {/* Violations */}
+                {profile.activities.violations && profile.activities.violations.trim() !== '' && (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '8px 12px' }}>
+                    <div style={{ fontSize: '12px', color: '#dc2626', fontFamily: 'Segoe UI, sans-serif', fontWeight: '600', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}><span>⚠️</span> Violations</div>
+                    <div style={{ fontSize: '13px', color: '#991b1b', fontFamily: 'Segoe UI, sans-serif' }}>{profile.activities.violations}</div>
+                  </div>
+                )}
+              </div>
+              {/* Card footer */}
+              <div style={{ padding: '12px 20px', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '8px' }}>
+                <button onClick={() => setSelectedProfile(profile)}
+                  style={{ flex: 1, padding: '8px', background: 'rgba(59,130,246,0.08)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Segoe UI, sans-serif', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.08)'; e.currentTarget.style.color = '#3b82f6'; }}
+                >View</button>
+                <button onClick={() => openEdit(profile)}
+                  style={{ flex: 1, padding: '8px', background: 'rgba(16,185,129,0.08)', color: '#059669', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Segoe UI, sans-serif', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#10b981'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16,185,129,0.08)'; e.currentTarget.style.color = '#059669'; }}
+                >Edit</button>
+                <button onClick={() => void deleteProfile(profile)}
+                  style={{ flex: 1, padding: '8px', background: 'rgba(239,68,68,0.08)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Segoe UI, sans-serif', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#dc2626'; }}
+                >Delete</button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <span style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>
+            Showing {paginatedProfiles.length === 0 ? 0 : (safePage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safePage * ITEMS_PER_PAGE, profiles.length)} of {profiles.length} profiles
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <button onClick={() => setCurrentPage(pg => Math.max(1, pg - 1))} disabled={safePage === 1}
+              style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#fff', color: '#374151', cursor: safePage === 1 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '500', fontFamily: 'Segoe UI, sans-serif', opacity: safePage === 1 ? 0.4 : 1 }}>← Prev</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button key={page} onClick={() => setCurrentPage(page)}
+                style={{ width: '32px', height: '32px', borderRadius: '6px', border: `1px solid ${page === safePage ? 'transparent' : '#e5e7eb'}`, background: page === safePage ? '#ff6b35' : '#fff', color: page === safePage ? '#fff' : '#374151', cursor: 'pointer', fontSize: '13px', fontWeight: '500', fontFamily: 'Segoe UI, sans-serif', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{page}</button>
+            ))}
+            <button onClick={() => setCurrentPage(pg => Math.min(totalPages, pg + 1))} disabled={safePage === totalPages}
+              style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#fff', color: '#374151', cursor: safePage === totalPages ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '500', fontFamily: 'Segoe UI, sans-serif', opacity: safePage === totalPages ? 0.4 : 1 }}>Next →</button>
+          </div>
+        </div>
+      )}
+
+      {/* Form Modal */}
       {showForm && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50,
-          animation: 'fadeIn 0.3s ease'
-        }}>
-          <div style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-            borderRadius: '16px',
-            width: '90%',
-            maxWidth: '700px',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            position: 'relative',
-            animation: 'slideUp 0.3s ease'
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: '0',
-              right: '0',
-              width: '120px',
-              height: '120px',
-              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%)',
-              borderRadius: '0 16px 0 120px'
-            }}></div>
-            
-            <div style={{ 
-              padding: '32px', 
-              borderBottom: '1px solid #e2e8f0',
-              position: 'relative',
-              zIndex: 1
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '10px',
-                  height: '10px',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                  borderRadius: '50%'
-                }}></div>
-                <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
-                  {editingProfile ? 'Edit Student Profile' : 'Add New Student Profile'}
-                </h2>
-              </div>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', width: '90%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+            <div style={{ background: '#1a1a1a', borderRadius: '16px 16px 0 0', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 1 }}>
+              <h2 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', margin: 0, fontFamily: 'Segoe UI, sans-serif' }}>{editingProfile ? 'Edit Student Profile' : 'Add New Student Profile'}</h2>
+              <button onClick={() => setShowForm(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '22px', cursor: 'pointer', lineHeight: 1, padding: '0 4px', opacity: 0.7, transition: 'opacity 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '1'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '0.7'; }}>×</button>
             </div>
-            <form onSubmit={submitForm} style={{ padding: '32px', position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'grid', gap: '24px' }}>
+            <form onSubmit={submitForm} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Student select */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>Student</label>
+                <select value={form.student_id} onChange={e => setForm(prev => ({ ...prev, student_id: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', background: '#fff', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField}>
+                  <option value="">Select student</option>
+                  {studentOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                </select>
+              </div>
+              {/* Academic History */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>Academic History</label>
+                <textarea placeholder="Enter academic history..." value={form.academic_history} onChange={e => setForm(prev => ({ ...prev, academic_history: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField} />
+              </div>
+              {/* Non-Academic Activities */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>Non-Academic Activities</label>
+                <textarea placeholder="Enter non-academic activities..." value={form.non_academic_activities} onChange={e => setForm(prev => ({ ...prev, non_academic_activities: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField} />
+              </div>
+              {/* Violations */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>Violations</label>
+                <textarea placeholder="Enter any violations..." value={form.violations} onChange={e => setForm(prev => ({ ...prev, violations: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {/* Skills */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      Student
-                    </div>
-                  </label>
-                  <select 
-                    value={form.student_id} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, student_id: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#6366f1';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  >
-                    <option value="">Select student</option>
-                    {studentOptions.map((option) => (
-                      <option value={option.value} key={option.value}>{option.label}</option>
-                    ))}
-                  </select>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>Skills (comma-separated)</label>
+                  <input placeholder="e.g. Programming, JavaScript" value={form.skills} onChange={e => setForm(prev => ({ ...prev, skills: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField} />
                 </div>
+                {/* Affiliations */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      Academic History
-                    </div>
-                  </label>
-                  <textarea 
-                    placeholder="Enter academic history..." 
-                    value={form.academic_history} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, academic_history: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      minHeight: '100px',
-                      resize: 'vertical',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#10b981';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>Affiliations (comma-separated)</label>
+                  <input placeholder="e.g. Student Council, Tech Club" value={form.affiliations} onChange={e => setForm(prev => ({ ...prev, affiliations: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField} />
                 </div>
+                {/* GPA */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      Non-Academic Activities
-                    </div>
-                  </label>
-                  <textarea 
-                    placeholder="Enter non-academic activities..." 
-                    value={form.non_academic_activities} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, non_academic_activities: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      minHeight: '100px',
-                      resize: 'vertical',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#f59e0b';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>GPA</label>
+                  <input type="number" min="0" max="4" step="0.01" placeholder="0.0 – 4.0" value={form.gpa} onChange={e => setForm(prev => ({ ...prev, gpa: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField} />
                 </div>
+                {/* Career Aspiration */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      Violations
-                    </div>
-                  </label>
-                  <textarea 
-                    placeholder="Enter any violations..." 
-                    value={form.violations} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, violations: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      minHeight: '100px',
-                      resize: 'vertical',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#ef4444';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      Skills (comma-separated)
-                    </div>
-                  </label>
-                  <input 
-                    placeholder="e.g. Programming, JavaScript, Python" 
-                    value={form.skills} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, skills: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#8b5cf6';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      Affiliations (comma-separated)
-                    </div>
-                  </label>
-                  <input 
-                    placeholder="e.g. Student Council, Tech Club" 
-                    value={form.affiliations} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, affiliations: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#ef4444';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      GPA
-                    </div>
-                  </label>
-                  <input 
-                    placeholder="Enter GPA (0.0 - 4.0)" 
-                    type="number" 
-                    min="0" 
-                    max="4" 
-                    step="0.01" 
-                    value={form.gpa} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, gpa: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#f59e0b';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '15px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                        borderRadius: '50%'
-                      }}></div>
-                      Career Aspiration
-                    </div>
-                  </label>
-                  <input 
-                    placeholder="Enter career aspiration..." 
-                    value={form.career_aspiration} 
-                    onChange={(e) => setForm((prev) => ({ ...prev, career_aspiration: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '10px',
-                      fontSize: '15px',
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#10b981';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px', fontFamily: 'Segoe UI, sans-serif' }}>Career Aspiration</label>
+                  <input placeholder="Enter career aspiration..." value={form.career_aspiration} onChange={e => setForm(prev => ({ ...prev, career_aspiration: e.target.value }))} style={{ width: '100%', padding: '10px 14px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', outline: 'none', boxSizing: 'border-box', color: '#1a1a1a' }} onFocus={focusOrange} onBlur={blurField} />
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e2e8f0' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setShowForm(false)}
-                  style={{
-                    padding: '14px 32px',
-                    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-                    color: '#475569',
-                    border: '2px solid #e2e8f0',
-                    borderRadius: '12px',
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
-                    e.currentTarget.style.borderColor = '#cbd5e1';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                  }}
-                >
-                  <span>❌</span> Cancel
-                </button>
-                <button 
-                  type="submit"
-                  style={{
-                    padding: '14px 32px',
-                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(99, 102, 241, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.3)';
-                  }}
-                >
-                  <span>💾</span> {editingProfile ? 'Update Profile' : 'Create Profile'}
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                <button type="button" onClick={() => setShowForm(false)} style={{ padding: '9px 18px', background: '#fff', color: '#374151', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', fontFamily: 'Segoe UI, sans-serif' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                >Cancel</button>
+                <button type="submit" style={{ padding: '9px 18px', background: 'linear-gradient(135deg,#ff6b35 0%,#e55a2b 100%)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: 'Segoe UI, sans-serif', boxShadow: '0 4px 14px rgba(255,107,53,0.35)', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+                >{editingProfile ? 'Update Profile' : 'Create Profile'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* View Modal */}
       {selectedProfile && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            width: '90%',
-            maxWidth: '600px',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}>
-            <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827', margin: 0 }}>
-                Individual Student Profile
-              </h2>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', width: '90%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+            <div style={{ background: '#1a1a1a', borderRadius: '16px 16px 0 0', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 1 }}>
+              <h2 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', margin: 0, fontFamily: 'Segoe UI, sans-serif' }}>Student Profile</h2>
+              <button onClick={() => setSelectedProfile(null)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '22px', cursor: 'pointer', lineHeight: 1, padding: '0 4px', opacity: 0.7, transition: 'opacity 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '1'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '0.7'; }}>×</button>
             </div>
-            <div style={{ padding: '24px' }}>
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '12px' }}>Student Information</h3>
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Student Info section */}
+              <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#ff6b35', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', fontFamily: 'Segoe UI, sans-serif' }}>Student Information</div>
                 <div style={{ display: 'grid', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Name:</span>
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{selectedProfile.student.full_name}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Student ID:</span>
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{selectedProfile.student.student_id}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Email:</span>
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{selectedProfile.student.email}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Program:</span>
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{selectedProfile.student.program}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Year Level:</span>
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{selectedProfile.student.year_level}</span>
-                  </div>
+                  {[['Name', selectedProfile.student.full_name],['Student ID', selectedProfile.student.student_id],['Email', selectedProfile.student.email],['Program', selectedProfile.student.program],['Year Level', 'Year ' + selectedProfile.student.year_level]].map(([label, val]) => (
+                    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', flexShrink: 0 }}>{label}:</span>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif', textAlign: 'right' }}>{val}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '12px' }}>Academic Information</h3>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  <div>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Academic History:</span>
-                    <p style={{ fontSize: '14px', color: '#111827', marginTop: '4px', margin: '4px 0 0 0' }}>
-                      {selectedProfile.academic_profile.academic_history || 'N/A'}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>GPA:</span>
-                    <p style={{ fontSize: '14px', color: '#111827', marginTop: '4px', margin: '4px 0 0 0' }}>
-                      {selectedProfile.academic_profile.gpa || 'N/A'}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Career Aspiration:</span>
-                    <p style={{ fontSize: '14px', color: '#111827', marginTop: '4px', margin: '4px 0 0 0' }}>
-                      {selectedProfile.academic_profile.career_aspiration || 'N/A'}
-                    </p>
-                  </div>
+              {/* Academic section */}
+              <div style={{ background: '#f0fdf4', borderRadius: '12px', padding: '16px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#059669', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', fontFamily: 'Segoe UI, sans-serif' }}>Academic Information</div>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  <div><span style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>GPA: </span><span style={{ fontSize: '13px', fontWeight: '700', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif' }}>{selectedProfile.academic_profile.gpa || 'N/A'}</span></div>
+                  <div><div style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '4px' }}>Academic History:</div><div style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif' }}>{selectedProfile.academic_profile.academic_history || 'N/A'}</div></div>
+                  <div><div style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '4px' }}>Career Aspiration:</div><div style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif' }}>{selectedProfile.academic_profile.career_aspiration || 'N/A'}</div></div>
                 </div>
               </div>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '12px' }}>Activities & Skills</h3>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  <div>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Non-Academic Activities:</span>
-                    <p style={{ fontSize: '14px', color: '#111827', marginTop: '4px', margin: '4px 0 0 0' }}>
-                      {selectedProfile.activities.non_academic_activities || 'N/A'}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Skills:</span>
-                    <p style={{ fontSize: '14px', color: '#111827', marginTop: '4px', margin: '4px 0 0 0' }}>
-                      {(selectedProfile.activities.skills || []).join(', ') || 'N/A'}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Affiliations:</span>
-                    <p style={{ fontSize: '14px', color: '#111827', marginTop: '4px', margin: '4px 0 0 0' }}>
-                      {(selectedProfile.activities.affiliations || []).join(', ') || 'N/A'}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '14px', color: '#6b7280' }}>Violations:</span>
-                    <p style={{ fontSize: '14px', color: '#111827', marginTop: '4px', margin: '4px 0 0 0' }}>
-                      {selectedProfile.activities.violations || 'N/A'}
-                    </p>
-                  </div>
+              {/* Activities section */}
+              <div style={{ background: '#fff7ed', borderRadius: '12px', padding: '16px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#d97706', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', fontFamily: 'Segoe UI, sans-serif' }}>Activities &amp; Skills</div>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  <div><div style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '4px' }}>Non-Academic Activities:</div><div style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif' }}>{selectedProfile.activities.non_academic_activities || 'N/A'}</div></div>
+                  <div><div style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '6px' }}>Skills:</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>{(selectedProfile.activities.skills || []).length > 0 ? (selectedProfile.activities.skills || []).map((s, i) => <span key={i} style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', fontFamily: 'Segoe UI, sans-serif' }}>{s}</span>) : <span style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif' }}>N/A</span>}</div></div>
+                  <div><div style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif', marginBottom: '6px' }}>Affiliations:</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>{(selectedProfile.activities.affiliations || []).length > 0 ? (selectedProfile.activities.affiliations || []).map((a, i) => <span key={i} style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', fontFamily: 'Segoe UI, sans-serif' }}>{a}</span>) : <span style={{ fontSize: '13px', color: '#374151', fontFamily: 'Segoe UI, sans-serif' }}>N/A</span>}</div></div>
+                  {selectedProfile.activities.violations && selectedProfile.activities.violations.trim() !== '' && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '10px 12px' }}><div style={{ fontSize: '13px', color: '#dc2626', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif', marginBottom: '4px' }}>⚠️ Violations:</div><div style={{ fontSize: '13px', color: '#991b1b', fontFamily: 'Segoe UI, sans-serif' }}>{selectedProfile.activities.violations}</div></div>
+                  )}
                 </div>
               </div>
-              
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button 
-                  onClick={() => setSelectedProfile(null)}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#f3f4f6',
-                    color: '#374151',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Close
-                </button>
+                <button onClick={() => setSelectedProfile(null)} style={{ padding: '9px 18px', background: '#fff', color: '#374151', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', fontFamily: 'Segoe UI, sans-serif' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                >Close</button>
               </div>
             </div>
           </div>

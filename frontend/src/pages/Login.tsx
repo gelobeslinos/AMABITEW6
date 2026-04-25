@@ -15,7 +15,6 @@ const Login: React.FC = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -251,103 +250,75 @@ const Login: React.FC = () => {
   return (
     <div style={{
       minHeight: '100vh',
+      backgroundImage: 'url(/hahga.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
       display: 'flex',
-      fontFamily: 'Arial, sans-serif'
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      position: 'relative'
     }}>
-      {/* Left side - Dark background */}
       <div style={{
-        flex: 1,
-        backgroundColor: '#1a1a1a',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px'
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.4)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)'
+      }}></div>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+        width: '100%',
+        maxWidth: '400px',
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 1
       }}>
+        {/* Header Section */}
         <div style={{
-          textAlign: 'center',
-          color: 'white',
-          maxWidth: '400px'
+          backgroundColor: '#1a1a1a',
+          padding: '32px 24px',
+          textAlign: 'center'
         }}>
           <img 
             src="/1.jpg" 
             alt="CCS Logo" 
             style={{
-              width: '120px',
-              height: '120px',
+              width: '100px',
+              height: '100px',
               borderRadius: '50%',
               objectFit: 'cover',
-              marginBottom: '24px',
-              border: '3px solid #ff6b35'
+              border: '2px solid #ff6b35'
             }}
           />
           <h1 style={{
-            fontSize: '28px',
+            fontSize: '24px',
             fontWeight: 'bold',
-            margin: '0 0 12px 0',
-            color: 'white'
+            color: 'white',
+            margin: '0 0 8px 0'
           }}>
-            PAMANTASAN NG CABUYAO login your account
+            CCS Department
+            <h6 style={{
+              fontSize: '16px',
+              fontWeight: 'normal',
+              color: '#ff6b35',
+              margin: '4px 0 0 0'
+            }}>College of Computing Studies</h6>
           </h1>
           <p style={{
-            fontSize: '16px',
-            margin: 0,
-            color: '#9ca3af',
-            lineHeight: '1.5'
+            fontSize: '14px',
+            color: '#ff6b35',
+            margin: 0
           }}>
-            Login Account
+            Sign in to your account
           </p>
         </div>
-      </div>
-      
-      {/* Right side - Orange tinted background with blended image */}
-      <div style={{
-        flex: 1,
-        backgroundColor: '#ff6b35',
-        backgroundImage: 'url("/1.jpg"), linear-gradient(135deg, rgba(255, 107, 53, 0.7) 0%, rgba(229, 90, 43, 0.7) 100%)',
-        backgroundSize: 'cover, cover',
-        backgroundPosition: 'center, center',
-        backgroundBlendMode: 'soft-light, normal',
-        backgroundRepeat: 'no-repeat, no-repeat',
-        filter: 'contrast(1.2) brightness(1.1) saturate(1.2) blur(0.5px)',
-        WebkitFilter: 'contrast(1.2) brightness(1.1) saturate(1.2) blur(0.5px)',
-        imageRendering: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Abstract shapes decoration */}
-        <div style={{
-          position: 'absolute',
-          top: '10%',
-          right: '10%',
-          width: '100px',
-          height: '100px',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: '50%'
-        }}></div>
-        <div style={{
-          position: 'absolute',
-          bottom: '20%',
-          left: '15%',
-          width: '60px',
-          height: '60px',
-          backgroundColor: 'rgba(255, 255, 255, 0.15)',
-          transform: 'rotate(45deg)'
-        }}></div>
-        
-        {/* Login form container */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '40px',
-          width: '100%',
-          maxWidth: '400px',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-          zIndex: 1
-        }}>
 
+        {/* Form Section */}
+        <div style={{ padding: '32px 24px' }}>
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '20px' }}>
               <label style={{
@@ -357,7 +328,7 @@ const Login: React.FC = () => {
                 color: '#374151',
                 marginBottom: '8px'
               }}>
-                Student ID Number
+                User ID
               </label>
               <input
                 type="text"
@@ -410,53 +381,33 @@ const Login: React.FC = () => {
               }}>
                 Password
               </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleInputChange('password')}
-                  placeholder="Enter your password"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    paddingRight: '45px',
-                    border: errors.password ? '2px solid #ef4444' : '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={(e) => {
-                    if (!errors.password) {
-                      e.target.style.borderColor = '#ff6b35';
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (!errors.password) {
-                      e.target.style.borderColor = '#e5e7eb';
-                    }
-                  }}
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#6b7280',
-                    fontSize: '18px'
-                  }}
-                >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
-                </button>
-              </div>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange('password')}
+                placeholder="Enter your password"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: errors.password ? '2px solid #ef4444' : '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => {
+                  if (!errors.password) {
+                    e.target.style.borderColor = '#ff6b35';
+                  }
+                }}
+                onBlur={(e) => {
+                  if (!errors.password) {
+                    e.target.style.borderColor = '#e5e7eb';
+                  }
+                }}
+                disabled={loading}
+              />
               {errors.password && (
                 <div style={{
                   color: '#ef4444',
@@ -494,7 +445,7 @@ const Login: React.FC = () => {
               style={{
                 width: '100%',
                 padding: '14px',
-                backgroundColor: loading ? '#fdba74' : '#ff6b35',
+                backgroundColor: loading ? '#9ca3af' : '#ff6b35',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -529,13 +480,33 @@ const Login: React.FC = () => {
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite'
                   }}></div>
-                  LOGIN...
+                  Signing in...
                 </span>
               ) : (
-                'LOGIN'
+                'Sign In'
               )}
             </button>
           </form>
+
+          <div style={{
+            marginTop: '24px',
+            textAlign: 'center',
+            fontSize: '13px',
+            color: '#6b7280'
+          }}>
+            <p style={{ margin: '0 0 8px 0' }}>
+              Need help? Go to the office 
+            </p>
+            <div style={{
+              padding: '12px',
+              backgroundColor: '#f8fafc',
+              borderRadius: '6px',
+              fontSize: '11px',
+              color: '#64748b',
+              lineHeight: '1.4'
+            }}>
+            </div>
+          </div>
         </div>
       </div>
 

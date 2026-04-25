@@ -1,0 +1,1 @@
+param(); $sp = "C:\Users\gyo\FINALS\frontend\src\pages\Students.tsx"; $c = "// generated"; [System.IO.File]::WriteAllText($sp, $c); Write-Host "done"
