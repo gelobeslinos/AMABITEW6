@@ -113,11 +113,18 @@ const LeaveRequests: React.FC = () => {
     }
   };
 
+  const getUserInfo = () => {
+    try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; }
+  };
+
   const handleApproval = (leaveRequest: LeaveRequest) => {
+    const userInfo = getUserInfo();
+    // Pre-fill manager_id from the logged-in user's employeeId
+    const defaultManagerId = userInfo?.employeeId ? String(userInfo.employeeId) : '';
     setSelectedLeaveRequest(leaveRequest);
     setApprovalData({
       action: 'approve',
-      manager_id: '',
+      manager_id: defaultManagerId,
       notes: '',
     });
     setShowApprovalModal(true);
@@ -125,21 +132,29 @@ const LeaveRequests: React.FC = () => {
 
   const handleApprovalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLeaveRequest || !approvalData.manager_id) return;
+    if (!selectedLeaveRequest) return;
+
+    // If still no manager_id, use the first available employee as fallback
+    const managerId = approvalData.manager_id || (employees.length > 0 ? String(employees[0].id) : '');
+    if (!managerId) {
+      alert('No manager available. Please ensure employees exist in the system.');
+      return;
+    }
 
     try {
       if (approvalData.action === 'approve') {
-        await leaveRequestService.approve(selectedLeaveRequest.id, parseInt(approvalData.manager_id), approvalData.notes);
+        await leaveRequestService.approve(selectedLeaveRequest.id, parseInt(managerId), approvalData.notes);
       } else {
-        await leaveRequestService.reject(selectedLeaveRequest.id, parseInt(approvalData.manager_id), approvalData.notes);
+        await leaveRequestService.reject(selectedLeaveRequest.id, parseInt(managerId), approvalData.notes);
       }
 
       await fetchData();
       setShowApprovalModal(false);
       setSelectedLeaveRequest(null);
       setApprovalData({ action: 'approve', manager_id: '', notes: '' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing approval:', error);
+      alert('Failed to process approval: ' + (error?.response?.data?.message || error?.message || 'Unknown error'));
     }
   };
 
@@ -780,6 +795,37 @@ const LeaveRequests: React.FC = () => {
                       {calculateDays(selectedLeaveRequest.start_date, selectedLeaveRequest.end_date)}
                     </div>
                   </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif' }}>
+                    Approving Manager *
+                  </label>
+                  <select
+                    value={approvalData.manager_id}
+                    onChange={(e) => setApprovalData({ ...approvalData, manager_id: e.target.value })}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      fontFamily: 'Segoe UI, sans-serif',
+                      outline: 'none',
+                      transition: 'border-color 0.15s',
+                      background: '#fff',
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = '#f59e0b'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+                  >
+                    <option value="">Select Manager</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.first_name} {emp.last_name} ({emp.position})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>

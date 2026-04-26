@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { employeeService, studentService, attendanceService, leaveRequestService, announcementService } from '../services/api';
 import {
-  UserGroupIcon,
   AcademicCapIcon,
   CalendarDaysIcon,
   DocumentTextIcon,
   PlusCircleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ChartPieIcon,
-  MegaphoneIcon,
   XMarkIcon,
-  } from '@heroicons/react/24/outline';
+  PencilIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
 
 interface Announcement {
   id: string;
@@ -96,11 +93,6 @@ const Dashboard: React.FC = () => {
         formData.append('attachment', selectedFile);
       }
 
-      console.log('FormData being sent:');
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-
       await announcementService.create(formData);
       // Refresh announcements
       const announcementsData = await announcementService.getAll();
@@ -110,7 +102,6 @@ const Dashboard: React.FC = () => {
       setSelectedFile(null);
     } catch (error) {
       console.error('Error creating announcement:', error);
-      console.error('Error response:', (error as any).response?.data);
     }
   };
 
@@ -134,11 +125,6 @@ const Dashboard: React.FC = () => {
       }
       formData.append('_method', 'PUT');
 
-      console.log('FormData being sent for update:');
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-
       await announcementService.update(parseInt(editingAnnouncement!.id), formData);
       // Refresh announcements
       const announcementsData = await announcementService.getAll();
@@ -148,7 +134,6 @@ const Dashboard: React.FC = () => {
       setSelectedFile(null);
     } catch (error) {
       console.error('Error updating announcement:', error);
-      console.error('Error response:', (error as any).response?.data);
     }
   };
 
@@ -167,1495 +152,836 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh',
-        backgroundColor: '#f8f9fa'
-      }}>
-        <div style={{ fontSize: '18px', color: '#6c757d' }}>Loading...</div>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f1f5f9', fontFamily: 'Segoe UI, sans-serif', gap: '20px' }}>
+        <style>{`@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.92)}}`}</style>
+        <img src="/1.jpg" alt="CCS" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #ff6b35', boxShadow: '0 0 0 8px rgba(255,107,53,.15)', animation: 'blink 1.2s ease-in-out infinite' }} />
+        <span style={{ fontSize: '15px', color: '#64748b', fontWeight: '500', letterSpacing: '.3px', fontFamily: 'Segoe UI, sans-serif' }}>Loading Dashboard...</span>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      padding: 'clamp(12px, 3vw, 24px)',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      minHeight: '100vh'
-    }}>
-      {/* Stats Cards */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-        gap: 'clamp(12px, 2vw, 24px)',
-        marginBottom: 'clamp(20px, 4vw, 32px)'
-      }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: 'clamp(12px, 2vw, 16px)',
-          padding: 'clamp(16px, 3vw, 24px)',
-          boxShadow: '0 10px 30px rgba(59, 130, 246, 0.15)',
-          border: '1px solid rgba(59, 130, 246, 0.1)',
-          position: 'relative',
-          overflow: 'hidden',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-5px)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(59, 130, 246, 0.25)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.15)';
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: 'clamp(60px, 8vw, 80px)',
-            height: 'clamp(60px, 8vw, 80px)',
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%)',
-            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
-          }}></div>
-          <div style={{ 
-            fontSize: 'clamp(12px, 2vw, 14px)', 
-            color: '#64748b', 
-            marginBottom: 'clamp(8px, 2vw, 12px)',
-            textTransform: 'uppercase',
-            fontWeight: '600',
-            letterSpacing: '0.5px'
-          }}>
-            Total Employees
-          </div>
-          <div style={{ 
-            fontSize: 'clamp(24px, 4vw, 36px)', 
-            fontWeight: 'bold', 
-            color: '#1e293b',
-            marginBottom: 'clamp(8px, 2vw, 12px)',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            {stats.totalEmployees}
-          </div>
-          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-            <UserGroupIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#3b82f6' }} />
-            <span>Staff Members</span>
-          </div>
-        </div>
+    <div style={{ padding: 'clamp(20px, 3vw, 32px)', background: '#f1f5f9', minHeight: '100vh', fontFamily: 'Segoe UI, sans-serif' }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: 'clamp(12px, 2vw, 16px)',
-          padding: 'clamp(16px, 3vw, 24px)',
-          boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)',
-          border: '1px solid rgba(16, 185, 129, 0.1)',
-          position: 'relative',
-          overflow: 'hidden',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-5px)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(16, 185, 129, 0.25)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 10px 30px rgba(16, 185, 129, 0.15)';
-        }}>
+      {/* Page header card */}
+      <div style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)', borderRadius: '16px', padding: '24px 28px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h1 style={{ color: '#ffffff', fontWeight: '700', fontSize: '24px', margin: '0 0 4px 0', fontFamily: 'Segoe UI, sans-serif' }}>Dashboard</h1>
+          <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0, fontFamily: 'Segoe UI, sans-serif' }}>System overview and quick access</p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: 'clamp(60px, 8vw, 80px)',
-            height: 'clamp(60px, 8vw, 80px)',
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)',
-            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
-          }}></div>
-          <div style={{ 
-            fontSize: 'clamp(12px, 2vw, 14px)', 
-            color: '#64748b', 
-            marginBottom: 'clamp(8px, 2vw, 12px)',
-            textTransform: 'uppercase',
-            fontWeight: '600',
-            letterSpacing: '0.5px'
-          }}>
-            Total Students
-          </div>
-          <div style={{ 
-            fontSize: 'clamp(24px, 4vw, 36px)', 
-            fontWeight: 'bold', 
-            color: '#1e293b',
-            marginBottom: 'clamp(8px, 2vw, 12px)',
+            width: '12px',
+            height: '12px',
             background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            {stats.totalStudents}
-          </div>
-          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-            <AcademicCapIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#10b981' }} />
-            <span>Enrolled Students</span>
-          </div>
-        </div>
-
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: 'clamp(12px, 2vw, 16px)',
-          padding: 'clamp(16px, 3vw, 24px)',
-          boxShadow: '0 10px 30px rgba(139, 92, 246, 0.15)',
-          border: '1px solid rgba(139, 92, 246, 0.1)',
-          position: 'relative',
-          overflow: 'hidden',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-5px)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(139, 92, 246, 0.25)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.15)';
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: 'clamp(60px, 8vw, 80px)',
-            height: 'clamp(60px, 8vw, 80px)',
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%)',
-            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
+            borderRadius: '50%',
+            animation: 'pulse 2s infinite'
           }}></div>
-          <div style={{ 
-            fontSize: 'clamp(12px, 2vw, 14px)', 
-            color: '#64748b', 
-            marginBottom: 'clamp(8px, 2vw, 12px)',
-            textTransform: 'uppercase',
-            fontWeight: '600',
-            letterSpacing: '0.5px'
-          }}>
-            Today's Attendance
-          </div>
-          <div style={{ 
-            fontSize: 'clamp(24px, 4vw, 36px)', 
-            fontWeight: 'bold', 
-            color: '#1e293b',
-            marginBottom: 'clamp(8px, 2vw, 12px)',
-            background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            {stats.todayAttendance}
-          </div>
-          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-            <CalendarDaysIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#8b5cf6' }} />
-            <span>Present Today</span>
-          </div>
+          <span style={{ color: '#94a3b8', fontSize: '13px', fontFamily: 'Segoe UI, sans-serif' }}>System Active</span>
         </div>
+      </div>
 
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: 'clamp(12px, 2vw, 16px)',
-          padding: 'clamp(16px, 3vw, 24px)',
-          boxShadow: '0 10px 30px rgba(245, 158, 11, 0.15)',
-          border: '1px solid rgba(245, 158, 11, 0.1)',
-          position: 'relative',
-          overflow: 'hidden',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-5px)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(245, 158, 11, 0.25)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 10px 30px rgba(245, 158, 11, 0.15)';
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: 'clamp(60px, 8vw, 80px)',
-            height: 'clamp(60px, 8vw, 80px)',
-            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%)',
-            borderRadius: '0 clamp(12px, 2vw, 16px) 0 clamp(60px, 8vw, 80px)'
-          }}></div>
-          <div style={{ 
-            fontSize: 'clamp(12px, 2vw, 14px)', 
-            color: '#64748b', 
-            marginBottom: 'clamp(8px, 2vw, 12px)',
-            textTransform: 'uppercase',
-            fontWeight: '600',
-            letterSpacing: '0.5px'
-          }}>
-            Pending Requests
-          </div>
-          <div style={{ 
-            fontSize: 'clamp(24px, 4vw, 36px)', 
-            fontWeight: 'bold', 
-            color: '#1e293b',
-            marginBottom: 'clamp(8px, 2vw, 12px)',
-            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            {stats.pendingLeaveRequests}
-          </div>
-          <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', color: '#64748b', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-            <DocumentTextIcon style={{ width: 'clamp(16px, 3vw, 20px)', height: 'clamp(16px, 3vw, 20px)', marginRight: '8px', color: '#f59e0b' }} />
+      {/* Stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1, background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{stats.totalEmployees}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '500' }}>Total Employees</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{stats.totalStudents}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '500' }}>Total Students</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1, background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{stats.todayAttendance}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '500' }}>Today's Attendance</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ fontSize: '28px', fontWeight: '700', lineHeight: 1, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{stats.pendingLeaveRequests}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: '500' }}>Pending Requests</div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+        <h2 style={{ margin: '0 0 20px', fontSize: '18px', color: '#1a1a1a', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif' }}>Quick Actions</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+          <button
+            onClick={() => navigate('/employees')}
+            style={{
+              padding: '16px',
+              background: '#fff',
+              color: '#374151',
+              border: '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontFamily: 'Segoe UI, sans-serif'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#ff6b35';
+              e.currentTarget.style.background = '#fff7ed';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.background = '#fff';
+            }}
+          >
+            <PlusCircleIcon style={{ width: '20px', height: '20px', color: '#ff6b35' }} />
+            <span>Add Employee</span>
+          </button>
+          
+          <button
+            onClick={() => navigate('/students')}
+            style={{
+              padding: '16px',
+              background: '#fff',
+              color: '#374151',
+              border: '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontFamily: 'Segoe UI, sans-serif'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#10b981';
+              e.currentTarget.style.background = '#f0fdf4';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.background = '#fff';
+            }}
+          >
+            <AcademicCapIcon style={{ width: '20px', height: '20px', color: '#10b981' }} />
+            <span>Add Student</span>
+          </button>
+          
+          <button
+            onClick={() => navigate('/attendance')}
+            style={{
+              padding: '16px',
+              background: '#fff',
+              color: '#374151',
+              border: '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontFamily: 'Segoe UI, sans-serif'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#8b5cf6';
+              e.currentTarget.style.background = '#faf5ff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.background = '#fff';
+            }}
+          >
+            <CalendarDaysIcon style={{ width: '20px', height: '20px', color: '#8b5cf6' }} />
+            <span>Attendance</span>
+          </button>
+          
+          <button
+            onClick={() => navigate('/leave-requests')}
+            style={{
+              padding: '16px',
+              background: '#fff',
+              color: '#374151',
+              border: '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontFamily: 'Segoe UI, sans-serif'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#f59e0b';
+              e.currentTarget.style.background = '#fff7ed';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.background = '#fff';
+            }}
+          >
+            <DocumentTextIcon style={{ width: '20px', height: '20px', color: '#f59e0b' }} />
             <span>Leave Requests</span>
+          </button>
+        </div>
+      </div>
+
+      {/* System Status */}
+      <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+        <h2 style={{ margin: '0 0 20px', fontSize: '18px', color: '#1a1a1a', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif' }}>System Status</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#166534' }}>System Operational</span>
+            </div>
+            <p style={{ margin: 0, fontSize: '13px', color: '#15803d' }}>All systems running normally</p>
+          </div>
+          <div style={{ padding: '16px', background: '#f0f9ff', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <div style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e40af' }}>Last Sync</span>
+            </div>
+            <p style={{ margin: 0, fontSize: '13px', color: '#1e3a8a' }}>{new Date().toLocaleTimeString()}</p>
+          </div>
+          <div style={{ padding: '16px', background: '#fefce8', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <div style={{ width: '8px', height: '8px', background: '#f59e0b', borderRadius: '50%' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#92400e' }}>Performance</span>
+            </div>
+            <p style={{ margin: 0, fontSize: '13px', color: '#78350f' }}>Response time under 200ms</p>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions and System Status */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-        gap: '20px' 
-      }}>
-        {/* Quick Actions */}
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: '16px',
-          padding: '28px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-          border: '1px solid rgba(0,0,0,0.05)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: '100px',
-            height: '100px',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%)',
-            borderRadius: '0 16px 0 100px'
-          }}></div>
-          
-          <h2 style={{ 
-            margin: '0 0 24px', 
-            fontSize: '20px', 
-            color: '#1e293b',
-            fontWeight: '700',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            <div style={{
-              width: '8px',
-              height: '8px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-              borderRadius: '50%'
-            }}></div>
-            Quick Actions
-          </h2>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      {/* Announcements Section */}
+      <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.07)', border: '1px solid rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={{ margin: '0', fontSize: '18px', color: '#1a1a1a', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif' }}>Announcements</h2>
+          {canCreateAnnouncement && (
             <button
-              onClick={() => navigate('/employees')}
+              onClick={() => setShowAnnouncementModal(true)}
               style={{
-                padding: '16px',
-                background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
-                color: '#1d4ed8',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(59, 130, 246, 0.25)';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
-                e.currentTarget.style.color = '#1d4ed8';
-              }}
-            >
-              <PlusCircleIcon style={{ width: '24px', height: '24px' }} />
-              <span>Add Employee</span>
-            </button>
-            
-            <button
-              onClick={() => navigate('/students')}
-              style={{
-                padding: '16px',
-                background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-                color: '#166534',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(34, 197, 94, 0.25)';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)';
-                e.currentTarget.style.color = '#166534';
-              }}
-            >
-              <AcademicCapIcon style={{ width: '24px', height: '24px' }} />
-              <span>Add Student</span>
-            </button>
-            
-            <button
-              onClick={() => navigate('/attendance')}
-              style={{
-                padding: '16px',
-                background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-                color: '#7c3aed',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(139, 92, 246, 0.25)';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)';
-                e.currentTarget.style.color = '#7c3aed';
-              }}
-            >
-              <CalendarDaysIcon style={{ width: '24px', height: '24px' }} />
-              <span>Attendance</span>
-            </button>
-            
-            <button
-              onClick={() => navigate('/leave-requests')}
-              style={{
-                padding: '16px',
-                background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
-                color: '#c2410c',
-                border: '1px solid rgba(245, 158, 11, 0.2)',
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(245, 158, 11, 0.25)';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.background = 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)';
-                e.currentTarget.style.color = '#c2410c';
-              }}
-            >
-              <DocumentTextIcon style={{ width: '24px', height: '24px' }} />
-              <span>Leave Requests</span>
-            </button>
-          </div>
-        </div>
-
-        {/* System Status */}
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: '16px',
-          padding: '28px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-          border: '1px solid rgba(0,0,0,0.05)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: '100px',
-            height: '100px',
-            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%)',
-            borderRadius: '0 16px 0 100px'
-          }}></div>
-          
-          <h2 style={{ 
-            margin: '0 0 24px', 
-            fontSize: '20px', 
-            color: '#1e293b',
-            fontWeight: '700',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            <div style={{
-              width: '8px',
-              height: '8px',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              borderRadius: '50%',
-              animation: 'pulse 2s infinite'
-            }}></div>
-            System Status
-          </h2>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{
-              padding: '16px',
-              background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
-              borderRadius: '12px',
-              border: '1px solid rgba(40, 167, 69, 0.2)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(40, 167, 69, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '0',
-                right: '0',
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)',
-                borderRadius: '0 12px 0 40px'
-              }}></div>
-              <div style={{ 
-                fontWeight: '600', 
-                color: '#155724', 
-                marginBottom: '6px',
-                fontSize: '15px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <CheckCircleIcon style={{ width: '16px', height: '16px', color: 'white' }} />
-                </div>
-                System Operational
-              </div>
-              <div style={{ 
-                fontSize: '14px', 
-                color: '#155724',
-                paddingLeft: '34px'
-              }}>
-                All systems are running normally
-              </div>
-            </div>
-
-            <div style={{
-              padding: '16px',
-              background: 'linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)',
-              borderRadius: '12px',
-              border: '1px solid rgba(23, 162, 184, 0.2)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(23, 162, 184, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '0',
-                right: '0',
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%)',
-                borderRadius: '0 12px 0 40px'
-              }}></div>
-              <div style={{ 
-                fontWeight: '600', 
-                color: '#0c5460', 
-                marginBottom: '6px',
-                fontSize: '15px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  background: 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <ClockIcon style={{ width: '16px', height: '16px', color: 'white' }} />
-                </div>
-                Last Sync
-              </div>
-              <div style={{ 
-                fontSize: '14px', 
-                color: '#0c5460',
-                paddingLeft: '34px'
-              }}>
-                {new Date().toLocaleTimeString()}
-              </div>
-            </div>
-
-            <div style={{
-              padding: '16px',
-              background: 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 193, 7, 0.2)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 193, 7, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '0',
-                right: '0',
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)',
-                borderRadius: '0 12px 0 40px'
-              }}></div>
-              <div style={{ 
-                fontWeight: '600', 
-                color: '#856404', 
-                marginBottom: '6px',
-                fontSize: '15px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  background: 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <ChartPieIcon style={{ width: '16px', height: '16px', color: 'white' }} />
-                </div>
-                Performance
-              </div>
-              <div style={{ 
-                fontSize: '14px', 
-                color: '#856404',
-                paddingLeft: '34px'
-              }}>
-                Response time under 200ms
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Announcements Section */}
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: '16px',
-          padding: '28px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-          border: '1px solid rgba(0,0,0,0.05)',
-          position: 'relative',
-          overflow: 'hidden',
-          marginBottom: '32px'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: '100px',
-            height: '100px',
-            background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-            borderRadius: '0 16px 0 100px'
-          }}></div>
-          
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            marginBottom: '24px'
-          }}>
-            <h2 style={{ 
-              margin: 0, 
-              fontSize: '20px', 
-              color: '#1e293b',
-              fontWeight: '700',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              <div style={{
-                width: '8px',
-                height: '8px',
                 background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-                borderRadius: '50%'
-              }}></div>
-              Announcements
-            </h2>
-            {canCreateAnnouncement && (
-              <button
-                onClick={() => setShowAnnouncementModal(true)}
-                style={{
-                  padding: '10px 20px',
-                  background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 107, 53, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 107, 53, 0.3)';
-                }}
-              >
-                <PlusCircleIcon style={{ width: '18px', height: '18px' }} />
-                Create Announcement
-              </button>
-            )}
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {announcements.length === 0 ? (
+                color: '#fff',
+                padding: '11px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '7px',
+                fontFamily: 'Segoe UI, sans-serif',
+                boxShadow: '0 4px 14px rgba(255,107,53,0.35)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,53,0.45)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(255,107,53,0.35)'; }}
+            >
+              <PlusCircleIcon style={{ width: '18px', height: '18px' }} />
+              Create Announcement
+            </button>
+          )}
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {announcements.length === 0 ? (
+            <div style={{
+              padding: '60px 20px',
+              textAlign: 'center',
+              background: '#f8fafc',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb'
+            }}>
               <div style={{
-                padding: '40px',
-                textAlign: 'center',
-                color: '#64748b',
-                background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-                borderRadius: '12px',
-                border: '1px solid rgba(0,0,0,0.05)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 20px'
-                }}>
-                  <MegaphoneIcon style={{ width: '30px', height: '30px', color: '#64748b' }} />
-                </div>
-                <h3 style={{ margin: '0 0 12px 0', color: '#1e293b', fontSize: '18px', fontWeight: '600' }}>
-                  No Announcements Yet
-                </h3>
-                <p style={{ margin: '0', fontSize: '14px', lineHeight: '1.5' }}>
-                  {canCreateAnnouncement 
-                    ? 'Create your first announcement to keep everyone informed.'
-                    : 'No announcements available at this time. Check back later for updates.'
-                  }
-                </p>
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: '#e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px',
+                fontSize: '28px'
+              }}>📢</div>
+              <div style={{ fontWeight: '700', fontSize: '16px', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif', marginBottom: '8px' }}>No Announcements Yet</div>
+              <div style={{ fontSize: '14px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>
+                {canCreateAnnouncement 
+                  ? 'Create your first announcement to keep everyone informed.'
+                  : 'No announcements available at this time. Check back later for updates.'
+                }
               </div>
-            ) : (
-              announcements.map(announcement => {
-                return (
-                  <div key={announcement.id} style={{
-                    padding: '20px',
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(0,0,0,0.08)',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                  onClick={() => {
-                    setSelectedAnnouncement(announcement);
-                    setShowAnnouncementViewModal(true);
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)';
-                  }}>
-                    <div style={{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '4px',
-                      height: '100%',
-                      background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-                      borderRadius: '12px 0 0 12px'
-                    }}></div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingLeft: '12px' }}>
-                      <div style={{ flex: 1 }}>
-                        <h4 style={{ margin: '0 0 8px 0', color: '#1e293b', fontSize: '16px', fontWeight: '600' }}>
-                          {announcement.title}
-                        </h4>
-                        <p style={{ margin: '0 0 12px 0', color: '#64748b', fontSize: '14px', lineHeight: '1.4' }}>
-                          {announcement.message}
-                        </p>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <span style={{
-                              fontSize: '12px',
-                              background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
-                              color: 'white',
-                              padding: '4px 10px',
-                              borderRadius: '20px',
-                              textTransform: 'capitalize',
-                              fontWeight: '500'
-                            }}>
-                              {announcement.target_audience}
-                            </span>
-                          </div>
-                        {canCreateAnnouncement && (
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditAnnouncement(announcement);
-                              }}
-                              style={{
-                                padding: '6px 12px',
-                                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-1px)';
-                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
-                              }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteAnnouncement(announcement.id);
-                              }}
-                              style={{
-                                padding: '6px 12px',
-                                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-1px)';
-                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
-                              }}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      </div>
-                      <div style={{
+            </div>
+          ) : (
+            announcements.map(announcement => (
+              <div key={announcement.id} style={{
+                padding: '20px',
+                background: '#f8fafc',
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                position: 'relative'
+              }}
+              onClick={() => {
+                setSelectedAnnouncement(announcement);
+                setShowAnnouncementViewModal(true);
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#ff6b35'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e5e7eb'; }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '0',
+                  left: '0',
+                  width: '4px',
+                  height: '100%',
+                  background: '#ff6b35',
+                  borderRadius: '12px 0 0 12px'
+                }}></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingLeft: '12px' }}>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ margin: '0 0 8px 0', color: '#1a1a1a', fontSize: '16px', fontWeight: '600', fontFamily: 'Segoe UI, sans-serif' }}>
+                      {announcement.title}
+                    </h4>
+                    <p style={{ margin: '0 0 12px 0', color: '#64748b', fontSize: '14px', lineHeight: '1.4', fontFamily: 'Segoe UI, sans-serif' }}>
+                      {announcement.message}
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span style={{
                         fontSize: '12px',
-                        color: '#64748b',
-                        marginLeft: '16px',
-                        textAlign: 'right',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px',
-                        minWidth: '120px'
+                        background: '#ff6b35',
+                        color: 'white',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        textTransform: 'capitalize',
+                        fontWeight: '500'
                       }}>
-                        <div style={{
-                          background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          fontWeight: '500',
-                          color: '#475569'
-                        }}>
-                          {new Date(announcement.created_at).toLocaleDateString()}
-                        </div>
-                        <div style={{
-                          fontSize: '11px',
-                          color: '#94a3b8'
-                        }}>
-                          {new Date(announcement.created_at).toLocaleTimeString()}
-                        </div>
-                      </div>
+                        {announcement.target_audience}
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>
+                        {new Date(announcement.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Announcement Modal */}
-        {showAnnouncementModal && (
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '24px',
-              width: '90%',
-              maxWidth: '500px',
-              maxHeight: '80vh',
-              overflowY: 'auto'
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px'
-              }}>
-                <h3 style={{ margin: 0, fontSize: '20px', color: '#2c3e50' }}>
-                  {editingAnnouncement ? 'Edit Announcement' : 'Create Announcement'}
-                </h3>
-                <button
-                  onClick={() => setShowAnnouncementModal(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    color: '#6c757d'
-                  }}
-                >
-                  <XMarkIcon style={{ width: '24px', height: '24px' }} />
-                </button>
-              </div>
-
-              <AnnouncementForm
-                onSubmit={editingAnnouncement ? handleUpdateAnnouncement : handleCreateAnnouncement}
-                onCancel={() => {
-                  setShowAnnouncementModal(false);
-                  setEditingAnnouncement(null);
-                  setSelectedFile(null);
-                }}
-                editingAnnouncement={editingAnnouncement}
-                selectedFile={selectedFile}
-                setSelectedFile={setSelectedFile}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Announcement View Modal */}
-        {showAnnouncementViewModal && selectedAnnouncement && (
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '30px',
-              width: '90%',
-              maxWidth: '700px',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
-            }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginBottom: '20px'
-              }}>
-                <h2 style={{ 
-                  margin: 0, 
-                  fontSize: '24px', 
-                  color: '#2c3e50',
-                  fontWeight: '600',
-                  lineHeight: '1.3'
-                }}>
-                  {selectedAnnouncement.title}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowAnnouncementViewModal(false);
-                    setSelectedAnnouncement(null);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    color: '#6c757d',
-                    padding: '0',
-                    width: '30px',
-                    height: '30px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-
-              <div style={{
-                marginBottom: '20px',
-                display: 'flex',
-                gap: '10px',
-                flexWrap: 'wrap'
-              }}>
-                <span style={{
-                  fontSize: '12px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  textTransform: 'capitalize'
-                }}>
-                  {selectedAnnouncement.target_audience}
-                </span>
-                <span style={{
-                  fontSize: '12px',
-                  backgroundColor: '#17a2b8',
-                  color: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '4px'
-                }}>
-                  {new Date(selectedAnnouncement.created_at).toLocaleDateString()}
-                </span>
-                <span style={{
-                  fontSize: '12px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '4px'
-                }}>
-                  {new Date(selectedAnnouncement.created_at).toLocaleTimeString()}
-                </span>
-                {selectedAnnouncement.attachment_type && (
-                  <span style={{
-                    fontSize: '12px',
-                    backgroundColor: '#ff6b35',
-                    color: 'white',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    textTransform: 'capitalize'
-                  }}>
-                    {selectedAnnouncement.attachment_type}
-                  </span>
-                )}
-              </div>
-
-              <div style={{
-                fontSize: '16px',
-                lineHeight: '1.6',
-                color: '#2c3e50',
-                whiteSpace: 'pre-wrap',
-                marginBottom: '20px'
-              }}>
-                {selectedAnnouncement.message}
-              </div>
-
-              {/* Attachment Display */}
-              {selectedAnnouncement.attachment_path && selectedAnnouncement.attachment_type && (
-                <div style={{
-                  marginBottom: '20px',
-                  padding: '15px',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px',
-                  border: '1px solid #dee2e6'
-                }}>
-                  <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#2c3e50' }}>
-                    Attachment: {selectedAnnouncement.attachment_name}
-                  </h4>
-                  {selectedAnnouncement.attachment_type === 'image' && (
-                    <img
-                      src={`http://localhost:8000/storage/${selectedAnnouncement.attachment_path}`}
-                      alt={selectedAnnouncement.attachment_name}
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '300px',
-                        borderRadius: '6px',
-                        display: 'block',
-                        margin: '0 auto'
-                      }}
-                      onError={(e) => {
-                        console.error('Image failed to load:', e);
-                        console.error('Image URL:', `http://localhost:8000/storage/${selectedAnnouncement.attachment_path}`);
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully');
-                      }}
-                    />
-                  )}
-                  {selectedAnnouncement.attachment_type === 'video' && (
-                    <video
-                      controls
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '300px',
-                        borderRadius: '6px',
-                        display: 'block',
-                        margin: '0 auto'
-                      }}
-                      onError={(e) => {
-                        console.error('Video failed to load:', e);
-                      }}
-                    >
-                      <source src={`http://localhost:8000/storage/${selectedAnnouncement.attachment_path}`} />
-                      Your browser does not support video tag.
-                    </video>
-                  )}
-                  {selectedAnnouncement.attachment_type === 'audio' && (
-                    <audio
-                      controls
-                      style={{
-                        width: '100%',
-                        display: 'block',
-                        margin: '0 auto'
-                      }}
-                      onError={(e) => {
-                        console.error('Audio failed to load:', e);
-                      }}
-                    >
-                      <source src={`http://localhost:8000/storage/${selectedAnnouncement.attachment_path}`} />
-                      Your browser does not support audio element.
-                    </audio>
+                  {canCreateAnnouncement && (
+                    <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditAnnouncement(announcement);
+                        }}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          background: 'rgba(59,130,246,0.08)',
+                          color: '#3b82f6',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(59,130,246,0.08)'; e.currentTarget.style.color = '#3b82f6'; }}
+                      >
+                        <PencilIcon style={{ width: '15px', height: '15px' }} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteAnnouncement(announcement.id);
+                        }}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          background: 'rgba(239,68,68,0.08)',
+                          color: '#ef4444',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.color = '#ef4444'; }}
+                      >
+                        <TrashIcon style={{ width: '15px', height: '15px' }} />
+                      </button>
+                    </div>
                   )}
                 </div>
-              )}
-
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '10px'
-              }}>
-                <button
-                  onClick={() => {
-                    setShowAnnouncementViewModal(false);
-                    setSelectedAnnouncement(null);
-                  }}
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Close
-                </button>
               </div>
-            </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Announcement Modal */}
+      {showAnnouncementModal && (
+        <AnnouncementModal
+          onClose={() => {
+            setShowAnnouncementModal(false);
+            setEditingAnnouncement(null);
+            setSelectedFile(null);
+          }}
+          onSubmit={editingAnnouncement ? handleUpdateAnnouncement : handleCreateAnnouncement}
+          editingAnnouncement={editingAnnouncement}
+          selectedFile={selectedFile}
+          setSelectedFile={setSelectedFile}
+        />
+      )}
+
+      {/* Announcement View Modal */}
+      {showAnnouncementViewModal && selectedAnnouncement && (
+        <AnnouncementViewModal
+          announcement={selectedAnnouncement}
+          onClose={() => {
+            setShowAnnouncementViewModal(false);
+            setSelectedAnnouncement(null);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Announcement Modal Component
+const AnnouncementModal: React.FC<{
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+  editingAnnouncement: Announcement | null;
+  selectedFile: File | null;
+  setSelectedFile: (file: File | null) => void;
+}> = ({ onClose, onSubmit, editingAnnouncement, selectedFile, setSelectedFile }) => {
+  const [formData, setFormData] = useState({
+    title: editingAnnouncement?.title || '',
+    message: editingAnnouncement?.message || '',
+    target_audience: editingAnnouncement?.target_audience || 'all',
+    is_active: editingAnnouncement ? true : true,
+    expires_at: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        background: '#fff',
+        borderRadius: '16px',
+        padding: '32px',
+        width: '90%',
+        maxWidth: '600px',
+        maxHeight: '90vh',
+        overflow: 'auto',
+        position: 'relative'
+      }}>
+        {/* Modal Header */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+          marginTop: '-32px', marginLeft: '-32px', marginRight: '-32px', marginBottom: '24px',
+          padding: '24px 32px',
+          borderRadius: '16px 16px 0 0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h3 style={{ margin: 0, color: '#fff', fontSize: '20px', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif' }}>
+            {editingAnnouncement ? 'Edit Announcement' : 'Create Announcement'}
+          </h3>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#fff',
+              cursor: 'pointer',
+              padding: '4px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <XMarkIcon style={{ width: '24px', height: '24px' }} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif' }}>
+              Title
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontFamily: 'Segoe UI, sans-serif',
+                outline: 'none',
+                transition: 'border-color 0.15s'
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = '#ff6b35'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+              required
+            />
           </div>
-        )}
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif' }}>
+              Message
+            </label>
+            <textarea
+              value={formData.message}
+              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              rows={4}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontFamily: 'Segoe UI, sans-serif',
+                outline: 'none',
+                transition: 'border-color 0.15s',
+                resize: 'vertical'
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = '#ff6b35'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif' }}>
+              Target Audience
+            </label>
+            <select
+              value={formData.target_audience}
+              onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontFamily: 'Segoe UI, sans-serif',
+                outline: 'none',
+                transition: 'border-color 0.15s'
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = '#ff6b35'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+            >
+              <option value="all">All</option>
+              <option value="employees">Employees</option>
+              <option value="students">Students</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif' }}>
+              Attachment (Optional)
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontFamily: 'Segoe UI, sans-serif',
+                outline: 'none',
+                transition: 'border-color 0.15s'
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = '#ff6b35'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+            />
+            {selectedFile && (
+              <div style={{ marginTop: '8px', fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>
+                Selected: {selectedFile.name}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '12px 24px',
+                background: '#f3f4f6',
+                color: '#374151',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontFamily: 'Segoe UI, sans-serif',
+                transition: 'all 0.15s'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#e5e7eb'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#f3f4f6'; }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontFamily: 'Segoe UI, sans-serif',
+                boxShadow: '0 4px 14px rgba(255,107,53,0.35)',
+                transition: 'all 0.15s'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,53,0.45)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(255,107,53,0.35)'; }}
+            >
+              {editingAnnouncement ? 'Update' : 'Create'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-// Announcement Form Component
-const AnnouncementForm: React.FC<{
-  onSubmit: (data: any) => void;
-  onCancel: () => void;
-  editingAnnouncement?: Announcement | null;
-  selectedFile?: File | null;
-  setSelectedFile?: (file: File | null) => void;
-}> = ({ onSubmit, onCancel, editingAnnouncement, selectedFile, setSelectedFile }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    message: '',
-    target_audience: 'all',
-    is_active: true,
-    expires_at: ''
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+// Announcement View Modal Component
+const AnnouncementViewModal: React.FC<{
+  announcement: Announcement;
+  onClose: () => void;
+}> = ({ announcement, onClose }) => {
+  const renderAttachment = () => {
+    if (!announcement.attachment_path) return null;
 
-  useEffect(() => {
-    if (editingAnnouncement) {
-      setFormData({
-        title: editingAnnouncement.title,
-        message: editingAnnouncement.message,
-        target_audience: editingAnnouncement.target_audience,
-        is_active: true,
-        expires_at: ''
-      });
-    } else {
-      setFormData({
-        title: '',
-        message: '',
-        target_audience: 'all',
-        is_active: true,
-        expires_at: ''
-      });
-    }
-  }, [editingAnnouncement]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    const attachmentUrl = `http://localhost:8000/${announcement.attachment_path}`;
     
-    console.log('Form submission started');
-    console.log('Form data:', formData);
-    console.log('Selected file:', selectedFile);
-    
-    // Validation
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
-    }
-    
-    if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
-    }
-    
-    if (Object.keys(newErrors).length > 0) {
-      console.log('Validation errors:', newErrors);
-      setErrors(newErrors);
-      return;
-    }
-    
-    console.log('Validation passed, submitting form');
-    const submissionData = {
-      ...formData,
-      expires_at: formData.expires_at || null
-    };
-    onSubmit(submissionData);
-  };
-
-  const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [field]: e.target.value });
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: '' });
+    switch (announcement.attachment_type) {
+      case 'image':
+        return (
+          <img
+            src={attachmentUrl}
+            alt={announcement.attachment_name}
+            style={{
+              width: '100%',
+              maxHeight: '400px',
+              objectFit: 'contain',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb'
+            }}
+          />
+        );
+      case 'video':
+        return (
+          <video
+            controls
+            style={{
+              width: '100%',
+              maxHeight: '400px',
+              borderRadius: '12px',
+              border: '1px solid #e5e7eb'
+            }}
+          >
+            <source src={attachmentUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        );
+      case 'audio':
+        return (
+          <audio controls style={{ width: '100%' }}>
+            <source src={attachmentUrl} type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+        );
+      default:
+        return (
+          <div style={{
+            padding: '20px',
+            background: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            textAlign: 'center'
+          }}>
+            <DocumentTextIcon style={{ width: '48px', height: '48px', color: '#64748b', marginBottom: '12px' }} />
+            <div style={{ fontSize: '14px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>
+              {announcement.attachment_name}
+            </div>
+            <a
+              href={attachmentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-block',
+                marginTop: '12px',
+                padding: '8px 16px',
+                background: '#ff6b35',
+                color: 'white',
+                textDecoration: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '600'
+              }}
+            >
+              Download
+            </a>
+          </div>
+        );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '6px',
-          fontSize: '14px',
-          fontWeight: '600',
-          color: '#2c3e50'
-        }}>
-          Title *
-        </label>
-        <input
-          type="text"
-          value={formData.title}
-          onChange={handleInputChange('title')}
-          placeholder="Enter announcement title"
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: errors.title ? '2px solid #e74c3c' : '2px solid #e9ecef',
-            borderRadius: '6px',
-            fontSize: '14px',
-            boxSizing: 'border-box'
-          }}
-        />
-        {errors.title && (
-          <div style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
-            {errors.title}
-          </div>
-        )}
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '6px',
-          fontSize: '14px',
-          fontWeight: '600',
-          color: '#2c3e50'
-        }}>
-          Message *
-        </label>
-        <textarea
-          value={formData.message}
-          onChange={handleInputChange('message')}
-          placeholder="Enter your announcement message"
-          rows={4}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: errors.message ? '2px solid #e74c3c' : '2px solid #e9ecef',
-            borderRadius: '6px',
-            fontSize: '14px',
-            boxSizing: 'border-box',
-            resize: 'vertical'
-          }}
-        />
-        {errors.message && (
-          <div style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
-            {errors.message}
-          </div>
-        )}
-      </div>
-
-      
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '6px',
-          fontSize: '14px',
-          fontWeight: '600',
-          color: '#2c3e50'
-        }}>
-          Target Audience
-        </label>
-        <select
-          value={formData.target_audience}
-          onChange={handleInputChange('target_audience')}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '2px solid #e9ecef',
-            borderRadius: '6px',
-            fontSize: '14px',
-            boxSizing: 'border-box'
-          }}
-        >
-          <option value="all">All Users</option>
-          <option value="students">Students Only</option>
-          <option value="faculty">Faculty Only</option>
-        </select>
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '6px',
-          fontSize: '14px',
-          fontWeight: '600',
-          color: '#2c3e50'
-        }}>
-          Attachment (Optional)
-        </label>
-        <input
-          type="file"
-          accept="image/*,video/*,audio/*"
-          onChange={(e) => {
-            console.log('File input changed');
-            const file = e.target.files?.[0];
-            console.log('Selected file:', file);
-            if (file) {
-              console.log('File details:', {
-                name: file.name,
-                size: file.size,
-                type: file.type
-              });
-              // Check file size (10MB max)
-              if (file.size > 10 * 1024 * 1024) {
-                alert('File size must be less than 10MB');
-                e.target.value = '';
-                return;
-              }
-              console.log('File accepted, setting selected file');
-              setSelectedFile?.(file);
-            } else {
-              console.log('No file selected');
-            }
-          }}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '2px solid #e9ecef',
-            borderRadius: '6px',
-            fontSize: '14px',
-            boxSizing: 'border-box'
-          }}
-        />
-        {selectedFile && (
-          <div style={{ marginTop: '8px', fontSize: '12px', color: '#6c757d' }}>
-            Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-          </div>
-        )}
-        {editingAnnouncement?.attachment_name && !selectedFile && (
-          <div style={{ marginTop: '8px', fontSize: '12px', color: '#6c757d' }}>
-            Current attachment: {editingAnnouncement.attachment_name}
-          </div>
-        )}
-      </div>
-
-      
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{
-          display: 'block',
-          marginBottom: '6px',
-          fontSize: '14px',
-          fontWeight: '600',
-          color: '#2c3e50'
-        }}>
-          Expires At (Optional)
-        </label>
-        <input
-          type="datetime-local"
-          value={formData.expires_at}
-          onChange={handleInputChange('expires_at')}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '2px solid #e9ecef',
-            borderRadius: '6px',
-            fontSize: '14px',
-            boxSizing: 'border-box'
-          }}
-        />
-      </div>
-
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
       <div style={{
-        display: 'flex',
-        gap: '12px',
-        justifyContent: 'flex-end'
+        background: '#fff',
+        borderRadius: '16px',
+        padding: '32px',
+        width: '90%',
+        maxWidth: '700px',
+        maxHeight: '90vh',
+        overflow: 'auto',
+        position: 'relative'
       }}>
-        <button
-          type="button"
-          onClick={onCancel}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#ff6b35',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-        >
-          {editingAnnouncement ? 'Update Announcement' : 'Create Announcement'}
-        </button>
+        {/* Modal Header */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+          marginTop: '-32px', marginLeft: '-32px', marginRight: '-32px', marginBottom: '24px',
+          padding: '24px 32px',
+          borderRadius: '16px 16px 0 0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h3 style={{ margin: 0, color: '#fff', fontSize: '20px', fontWeight: '700', fontFamily: 'Segoe UI, sans-serif' }}>
+            {announcement.title}
+          </h3>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#fff',
+              cursor: 'pointer',
+              padding: '4px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <XMarkIcon style={{ width: '24px', height: '24px' }} />
+          </button>
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{
+              fontSize: '12px',
+              background: '#ff6b35',
+              color: 'white',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              textTransform: 'capitalize',
+              fontWeight: '500'
+            }}>
+              {announcement.target_audience}
+            </span>
+            <span style={{ fontSize: '13px', color: '#64748b', fontFamily: 'Segoe UI, sans-serif' }}>
+              {new Date(announcement.created_at).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '24px' }}>
+          <p style={{ margin: 0, fontSize: '16px', lineHeight: '1.6', color: '#374151', fontFamily: 'Segoe UI, sans-serif' }}>
+            {announcement.message}
+          </p>
+        </div>
+
+        {announcement.attachment_path && (
+          <div style={{ marginBottom: '24px' }}>
+            <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Segoe UI, sans-serif' }}>
+              Attachment
+            </h4>
+            {renderAttachment()}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '12px 24px',
+              background: 'linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontFamily: 'Segoe UI, sans-serif',
+              boxShadow: '0 4px 14px rgba(255,107,53,0.35)',
+              transition: 'all 0.15s'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,53,0.45)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(255,107,53,0.35)'; }}
+          >
+            Close
+          </button>
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 
